@@ -3,6 +3,7 @@ package Traversal.WhyDiffAlgorithm;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -20,6 +21,7 @@ import org.neo4j.helpers.collection.Iterables;
 import Traversal.WhyDiffAlgorithm.App.NodeType1;
 
 public class TryFT {
+	static long startTime = System.currentTimeMillis();
 	static GraphDatabaseService graphDB = new GraphDatabaseFactory()
 			.newEmbeddedDatabase("newdb");
 
@@ -37,13 +39,6 @@ public class TryFT {
 
 			List<String> addVisited = new ArrayList<String>();
 			List<String> addVisited1 = new ArrayList<String>();
-			// do {
-			/*
-			 * String firstEntityAttributes = (String)
-			 * firstEntity.getProperty("attributes"); String
-			 * secondEntityAttributes = (String)
-			 * firstEntity.getProperty("attributes");
-			 */
 			do {
 				String firstEntityAttributes = (String) firstEntity
 						.getProperty("attributes");
@@ -128,59 +123,12 @@ public class TryFT {
 				compare(firstEntityAttributes, secondEntityAttributes);
 			} while (!(firstId.contains("esc:svi-esc/document/132101/132102")));
 
-			/*
-			 * org.neo4j.graphdb.traversal.Traverser traverser = activity
-			 * .traverse(firstEntity); for (Node friend : traverser.nodes()) {
-			 * 
-			 * currentNode = (String) friend.getProperty("id"); String
-			 * currentNodeAttribute = (String) friend
-			 * .getProperty("attributes"); System.out.println("Current Node" +
-			 * currentNode); if (currentNodeAttribute .contains("Entity") &&
-			 * !(currentNode.equalsIgnoreCase(firstId))) {
-			 * System.out.println("yes"); firstId = currentNode; firstEntity =
-			 * graphDB.findNode(NodeType1.activity, "id", firstId);
-			 * System.out.println("Relationships");
-			 * 
-			 * // System.out.println("First Entity" + firstId + "\t" + //
-			 * firstEntity.toString()); } else if
-			 * (!(currentNode.equalsIgnoreCase(firstId) && currentNodeAttribute
-			 * .contains("Activity"))) { firstId = currentNode; firstEntity =
-			 * graphDB.findNode(NodeType1.activity, "id", firstId);
-			 * System.out.println("Relationships"); } break; }
-			 */
-			// } while
-			// (!(firstId.contains("esc:svi-esc/document/132101/132102")));
-
-			/*
-			 * Node activity1 = graphDB.findNode(NodeType1.activity, "id",
-			 * activityNode); TraversalDescription entity1 =
-			 * graphDB.traversalDescription().breadthFirst() .expand(new
-			 * PathExpander<Object>() {
-			 * 
-			 * @Override public Iterable<Relationship> expand(Path path,
-			 * BranchState<Object> state) { switch (path.length()) { case 0:
-			 * return path.endNode().getRelationships(
-			 * DynamicRelationshipType.withName("wasGeneratedBy") ); case 1:
-			 * return path.endNode().getRelationships(
-			 * DynamicRelationshipType.withName("used") ); default: return
-			 * Iterables.empty(); } }
-			 * 
-			 * @Override public PathExpander<Object> reverse() { // not used for
-			 * unidirectional traversals throw new
-			 * UnsupportedOperationException(); } });
-			 * org.neo4j.graphdb.traversal.Traverser traverser1 = entity1
-			 * .traverse(activity1); System.out.println("Activity Traversal");
-			 * for (Node friend : traverser1.nodes()) { entityNode = (String)
-			 * friend.getProperty("id"); System.out.println("Entity Node" +
-			 * entityNode); } firstId = entityNode; firstEntity =
-			 * graphDB.findNode(NodeType1.entity, "id", firstId);
-			 */
-			// }
-			// while(!(firstId.contains("esc:svi-esc/document/132101/132102")));
-
 		} catch (Exception ex) {
 
 		}
+		 long stopTime = System.currentTimeMillis();
+	     long elapsedTime = stopTime - startTime;
+	     System.out.println(elapsedTime);
 	}
 
 	private static void checkUnvisitedNodes(List<String> addVisited,
@@ -198,13 +146,34 @@ public class TryFT {
 					NodeType1.entity, "id", DisplayId2);
 			Node missedFirstEntity = missedentity1.next();
 			Node missedSecondEntity = missedentity2.next();
-			String returnedActivity1 = checkEntity(missedFirstEntity);
-			String returnedActivity2 = checkactivity(missedSecondEntity);
-			System.out.println("Missed Relationships " + returnedActivity1);
-			System.out.println("Missed Relationships 1 " + returnedActivity2);
-
+			
+			System.out.println("Comparing Entities "+(String)missedFirstEntity.getProperty("id") +
+					"\t\t"+ (String)missedSecondEntity.getProperty("id"));
 			compare((String) missedFirstEntity.getProperty("attributes"),
 					(String) missedSecondEntity.getProperty("attributes"));
+			
+			String activity1  = checkEntity1(missedFirstEntity);
+			String activity2  = checkEntity1(missedSecondEntity);
+			
+			Node activityNode1 = graphDB.findNode(NodeType1.activity, "id", activity1);
+			Node activityNode2 = graphDB.findNode(NodeType1.activity, "id", activity2);
+			
+			System.out.println("Display act "+activityNode1.getProperty("id")+ " "+activityNode2.getProperty("id"));
+			
+			String entity1  = checkactivity1(activityNode1);
+			String entity2  = checkactivity1(activityNode2);
+			
+			missedFirstEntity = graphDB.findNode(NodeType1.entity, "id", entity1);
+			missedSecondEntity = graphDB.findNode(NodeType1.entity, "id", entity2);
+			
+			System.out.println("Display act "+missedFirstEntity.getProperty("id")+ " "+missedSecondEntity.getProperty("id"));
+			
+			
+			System.out.println("Comparing Entities "+(String)missedFirstEntity.getProperty("id") +
+					"\t\t"+ (String)missedSecondEntity.getProperty("id"));
+			compare((String) missedFirstEntity.getProperty("attributes"),
+					(String) missedSecondEntity.getProperty("attributes"));
+			
 		} catch (Exception ex) {
 			System.out.println(ex.toString());
 		}
@@ -220,14 +189,48 @@ public class TryFT {
 							BranchState<Object> state) {
 						switch (path.length()) {
 						case 0:
-							System.out.println(path.endNode().getRelationships(
-									DynamicRelationshipType.withName("used")));
 							return path.endNode().getRelationships(
 									DynamicRelationshipType.withName("used"));
 						case 1:
 							return path.endNode().getRelationships(
 									DynamicRelationshipType
 											.withName("wasGeneratedBy"));
+						default:
+							return Iterables.empty();
+						}
+					}
+
+					@Override
+					public PathExpander<Object> reverse() {
+						// not used for unidirectional traversals
+						throw new UnsupportedOperationException();
+					}
+				}).evaluator(Evaluators.atDepth(1));
+		org.neo4j.graphdb.traversal.Traverser traverser = activity1
+				.traverse(entity1);
+		System.out.println("Entity Traversal");
+		for (Node friend : traverser.nodes()) {
+			activityNode = (String) friend.getProperty("id");
+			System.out.println("Current Node" + activityNode);
+		}
+		return activityNode;
+	}
+	private static String checkEntity1(Node entity1) {
+		String activityNode = null;
+		// TODO Auto-generated method stub
+		TraversalDescription activity1 = graphDB.traversalDescription()
+				.breadthFirst().expand(new PathExpander<Object>() {
+					@Override
+					public Iterable<Relationship> expand(Path path,
+							BranchState<Object> state) {
+						switch (path.length()) {
+						case 0:
+							return path.endNode().getRelationships(
+									DynamicRelationshipType.withName("wasGeneratedBy"));
+						case 1:
+							return path.endNode().getRelationships(
+									DynamicRelationshipType
+											.withName("used"));
 						default:
 							return Iterables.empty();
 						}
@@ -259,13 +262,48 @@ public class TryFT {
 							BranchState<Object> state) {
 						switch (path.length()) {
 						case 0:
-
 							return path.endNode().getRelationships(
 									DynamicRelationshipType
 											.withName("wasGeneratedBy"));
 						case 1:
 							return path.endNode().getRelationships(
 									DynamicRelationshipType.withName("used"));
+						default:
+							return Iterables.empty();
+						}
+					}
+
+					@Override
+					public PathExpander<Object> reverse() {
+						// not used for unidirectional traversals
+						throw new UnsupportedOperationException();
+					}
+				}).evaluator(Evaluators.atDepth(1));
+		org.neo4j.graphdb.traversal.Traverser traverser1 = entity1
+				.traverse(activity);
+		for (Node friend : traverser1.nodes()) {
+			entityNode = (String) friend.getProperty("id");
+			System.out.println("Entity Node" + entityNode);
+		}
+		return entityNode;
+	}
+	
+	private static String checkactivity1(Node activity) {
+		String entityNode = null;
+		// TODO Auto-generated method stub
+		TraversalDescription entity1 = graphDB.traversalDescription()
+				.breadthFirst().expand(new PathExpander<Object>() {
+					@Override
+					public Iterable<Relationship> expand(Path path,
+							BranchState<Object> state) {
+						switch (path.length()) {
+						case 0:
+							return path.endNode().getRelationships(
+									DynamicRelationshipType
+											.withName("used"));
+						case 1:
+							return path.endNode().getRelationships(
+									DynamicRelationshipType.withName("wasGeneratedBy"));
 						default:
 							return Iterables.empty();
 						}
