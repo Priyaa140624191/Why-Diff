@@ -26,28 +26,42 @@ public class TryFT {
 	public static void main(String[] args) {
 
 		try (Transaction tx = graphDB.beginTx()) {
-			String firstId = "esc:svi-esc/document/663/664";
-			String secondId = "esc:svi-esc/document/663/664";
-			ResourceIterator<Node> entity = graphDB.findNodes(NodeType1.entity,
-					"id", firstId);
-			Node firstEntity = entity.next();
-			Node secondEntity = entity.next();
+			String firstId = null, firstActivityId = null;
+			String secondId = null, secondActivityId = null;
 			String returnedEntity = null, returnedSecondEntity = null;
-			String returnedActivity = null, returnedSecondActivity = null;
+			String firstActivity = "esc:svi-esc/invocation/132076/block/BFF867C8-81FF-BAD2-4CEF-6F6DC6F0769A";
+			String secondActivity = "esc:svi-esc/invocation/132084/block/BFF867C8-81FF-BAD2-4CEF-6F6DC6F0769A";
+
+			String firstEntityAttributes = null;
+			String secondEntityAttributes = null;
+
+			String returnedActivity = null;
+			String returnedSecondActivity = null;
+
+			Node activity1 = graphDB.findNode(NodeType1.activity, "id",
+					firstActivity);
+			Node activity2 = graphDB.findNode(NodeType1.activity, "id",
+					secondActivity);
+
+			System.out.println("Activity 1 and Activity 2 " + activity1
+					+ activity2);
 
 			List<String> addVisited = new ArrayList<String>();
 			List<String> addVisited1 = new ArrayList<String>();
+			String returnedEntity1 = checkactivity(activity1);
+			String returnedEntity2 = checkactivity(activity2);
 			do {
-				String firstEntityAttributes = (String) firstEntity
-						.getProperty("attributes");
-				String secondEntityAttributes = (String) firstEntity
-						.getProperty("attributes");
-
-				returnedActivity = checkEntity(firstEntity);
-
-				Node activity1 = graphDB.findNode(NodeType1.activity, "id",
-						returnedActivity);
 				returnedEntity = checkactivity(activity1);
+				Node firstEntity = graphDB.findNode(NodeType1.entity, "id",
+						returnedEntity);
+				firstId = (String) firstEntity.getProperty("id");
+				// System.out.println("Entity Id "+firstId);
+				firstEntityAttributes = (String) firstEntity
+						.getProperty("attributes");
+				returnedActivity = checkEntity(firstEntity);
+				System.out.println("firstId " + firstId + "\t"
+						+ firstEntityAttributes);
+				System.out.println("retn Activity " + returnedActivity);
 				System.out.println("Activity Traversal");
 				System.out.println("Check Multiple Relationships");
 				System.out
@@ -58,22 +72,40 @@ public class TryFT {
 				System.out.println("Relationship Count "
 						+ activity1.getDegree());
 				for (Relationship rn : rnship) {
-					checkEntityVisited = (String) rn.getEndNode().getProperty(
-							"id");
-					System.out.println("Entity Id" + checkEntityVisited);
+					checkEntityVisited = (String) rn.getOtherNode(activity1)
+							.getProperty("id");
+					System.out.println("Entity Id " + checkEntityVisited);
+					System.out.println("first Id " + firstId);
+					// if(!firstId.contains(returnedEntity1))
 					if (!firstId.contains(checkEntityVisited)) {
+						// System.out.println("hi");
 						addVisited.add(checkEntityVisited);
 					}
 				}
+				System.out.println("addVisited " + addVisited.toString());
 				addVisited.remove(addVisited.size() - 1);
+				if (addVisited.contains(returnedEntity1)) {
+					addVisited.remove(returnedEntity1);
+				}
+				System.out.println("addVisited " + addVisited.toString());
+				// System.out.println("hi");
+				System.out.println("retn Activity " + returnedActivity);
 
-				firstId = returnedEntity;
-				firstEntity = graphDB.findNode(NodeType1.entity, "id", firstId);
+				firstActivityId = returnedActivity;
+				System.out.println("first Activity Id " + firstActivityId);
+				activity1 = graphDB.findNode(NodeType1.activity, "id",
+						firstActivityId);
+				System.out.println("first Activity Id " + firstActivityId);
+				// returnedSecondActivity = checkEntity(secondEntity);
 
-				returnedSecondActivity = checkEntity(secondEntity);
-				Node activity2 = graphDB.findNode(NodeType1.activity, "id",
-						returnedSecondActivity);
 				returnedSecondEntity = checkactivity(activity2);
+				System.out.println(returnedSecondEntity);
+				Node secondEntity = graphDB.findNode(NodeType1.entity, "id",
+						returnedSecondEntity);
+				secondId = (String) secondEntity.getProperty("id");
+				secondEntityAttributes = (String) secondEntity
+						.getProperty("attributes");
+				returnedSecondActivity = checkEntity(secondEntity);
 				System.out.println("Activity Traversal");
 				System.out.println("Check Multiple Relationships");
 				System.out
@@ -83,26 +115,41 @@ public class TryFT {
 				System.out.println("Relationship Count "
 						+ activity2.getDegree());
 				for (Relationship rn : rnship1) {
-					checkEntityVisited1 = (String) rn.getEndNode().getProperty(
-							"id");
-					if (!secondId.contains(checkEntityVisited1)) {
+					checkEntityVisited1 = (String) rn.getOtherNode(activity2)
+							.getProperty("id");
+					if (!secondId.equals(checkEntityVisited1)) {
 						addVisited1.add(checkEntityVisited1);
 					}
 				}
 				addVisited1.remove(addVisited1.size() - 1);
+				if (addVisited1.contains(returnedEntity2)) {
+					addVisited1.remove(returnedEntity2);
+				}
+				// System.out.println("Check immediate***");
 				if (!(addVisited.isEmpty()) && !(addVisited1.isEmpty())) {
+					// System.out.println("Check immediate");
 					checkUnvisitedNodes(addVisited, addVisited1);
+					// System.out.println("**Check immediate**");
 					addVisited.clear();
 					addVisited1.clear();
 				}
+				try {
+					secondActivityId = returnedSecondActivity;
+					activity2 = graphDB.findNode(NodeType1.activity, "id",
+							secondActivityId);
+				} catch (NullPointerException ex) {
 
-				secondId = returnedSecondEntity;
-				secondEntity = graphDB.findNode(NodeType1.entity, "id",
-						secondId);
+				}
+				/*
+				 * firstActivityId = returnedActivity;
+				 * 
+				 * activity1 = graphDB.findNode(NodeType1.activity, "id",
+				 * firstActivityId);
+				 */
 				System.out.println("Comparing Entities " + firstId + "\t\t"
 						+ secondId);
 				compare(firstEntityAttributes, secondEntityAttributes);
-			} while (!(firstId.contains("esc:svi-esc/document/132101/132102")));
+			} while (firstActivityId != null && secondActivityId != null);
 
 		} catch (Exception ex) {
 
@@ -136,23 +183,31 @@ public class TryFT {
 				do {
 					activity1 = checkEntity1(missedFirstEntity);
 					activity2 = checkEntity1(missedSecondEntity);
-
-					Node activityNode1 = graphDB.findNode(NodeType1.activity,
-							"id", activity1);
-					Node activityNode2 = graphDB.findNode(NodeType1.activity,
-							"id", activity2);
-
-					System.out.println("Display act "
-							+ activityNode1.getProperty("id") + " "
-							+ activityNode2.getProperty("id"));
-
+					Node activityNode1 = null;
+					Node activityNode2 = null;
+					System.out.println("act null " + activity1 + activity2);
+					if (activity1 != null && activity2 != null) {
+						activityNode1 = graphDB.findNode(NodeType1.activity,
+								"id", activity1);
+						activityNode2 = graphDB.findNode(NodeType1.activity,
+								"id", activity2);
+						System.out.println("Display act "
+								+ activityNode1.getProperty("id") + " "
+								+ activityNode2.getProperty("id"));
+					} else {
+						break;
+					}
 					String entity1 = checkactivity1(activityNode1);
 					String entity2 = checkactivity1(activityNode2);
+					try {
+						missedFirstEntity = graphDB.findNode(NodeType1.entity,
+								"id", entity1);
+						missedSecondEntity = graphDB.findNode(NodeType1.entity,
+								"id", entity2);
+					} catch (NullPointerException ex) {
 
-					missedFirstEntity = graphDB.findNode(NodeType1.entity,
-							"id", entity1);
-					missedSecondEntity = graphDB.findNode(NodeType1.entity,
-							"id", entity2);
+					}
+					System.out.println("check after ***");
 					System.out.println("Comparing Entities "
 							+ (String) missedFirstEntity.getProperty("id")
 							+ "\t\t"
@@ -161,7 +216,8 @@ public class TryFT {
 							.getProperty("attributes"),
 							(String) missedSecondEntity
 									.getProperty("attributes"));
-				} while (activity1 == null && activity2 == null);
+					System.out.println("check null");
+				} while (activity1 != null && activity2 != null);
 			} catch (Exception ex) {
 				System.out.println(ex.toString());
 			}
@@ -195,10 +251,13 @@ public class TryFT {
 				}).evaluator(Evaluators.atDepth(1));
 		org.neo4j.graphdb.traversal.Traverser traverser = activity1
 				.traverse(entity1);
-		System.out.println("Entity Traversal");
 		for (Node friend : traverser.nodes()) {
-			activityNode = (String) friend.getProperty("id");
-			System.out.println("Current Node" + activityNode);
+			try {
+				activityNode = (String) friend.getProperty("id");
+			} catch (NullPointerException ex) {
+
+			}
+			// System.out.println("Current Node" + activityNode);
 		}
 		return activityNode;
 	}
@@ -230,10 +289,13 @@ public class TryFT {
 				}).evaluator(Evaluators.atDepth(1));
 		org.neo4j.graphdb.traversal.Traverser traverser = activity1
 				.traverse(entity1);
-		System.out.println("Entity Traversal");
 		for (Node friend : traverser.nodes()) {
-			activityNode = (String) friend.getProperty("id");
-			System.out.println("Current Node" + activityNode);
+			try {
+				activityNode = (String) friend.getProperty("id");
+			} catch (NullPointerException ex) {
+
+			}
+			// System.out.println("Current Node" + activityNode);
 		}
 		return activityNode;
 	}
@@ -267,8 +329,12 @@ public class TryFT {
 		org.neo4j.graphdb.traversal.Traverser traverser1 = entity1
 				.traverse(activity);
 		for (Node friend : traverser1.nodes()) {
-			entityNode = (String) friend.getProperty("id");
-			System.out.println("Entity Node" + entityNode);
+			try {
+				entityNode = (String) friend.getProperty("id");
+				System.out.println("Entity Node" + entityNode);
+			} catch (NullPointerException ex) {
+
+			}
 		}
 		return entityNode;
 	}
@@ -302,8 +368,12 @@ public class TryFT {
 		org.neo4j.graphdb.traversal.Traverser traverser1 = entity1
 				.traverse(activity);
 		for (Node friend : traverser1.nodes()) {
-			entityNode = (String) friend.getProperty("id");
-			System.out.println("Entity Node" + entityNode);
+			try {
+				entityNode = (String) friend.getProperty("id");
+				System.out.println("Entity Node" + entityNode);
+			} catch (NullPointerException ex) {
+
+			}
 		}
 		return entityNode;
 	}
@@ -362,3 +432,4 @@ public class TryFT {
 
 	}
 }
+
