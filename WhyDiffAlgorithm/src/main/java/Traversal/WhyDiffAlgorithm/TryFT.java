@@ -2,6 +2,7 @@ package Traversal.WhyDiffAlgorithm;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -38,125 +39,272 @@ public class TryFT {
 			String returnedActivity = null;
 			String returnedSecondActivity = null;
 
-			Node activity1 = graphDB.findNode(NodeType1.activity, "id",
-					firstActivity);
-			Node activity2 = graphDB.findNode(NodeType1.activity, "id",
-					secondActivity);
+			String[] firstsplit = firstActivity
+					.split("esc:svi-esc/invocation/132076/block/");
+			String[] secondsplit = secondActivity
+					.split("esc:svi-esc/invocation/132084/block/");
 
-			System.out.println("Activity 1 and Activity 2 " + activity1
-					+ activity2);
+			System.out.println("First Split " + firstsplit[1]);
+			System.out.println("Second Split " + secondsplit[1]);
 
-			List<String> addVisited = new ArrayList<String>();
-			List<String> addVisited1 = new ArrayList<String>();
-			String returnedEntity1 = checkactivity(activity1);
-			String returnedEntity2 = checkactivity(activity2);
-			do {
-				returnedEntity = checkactivity(activity1);
-				Node firstEntity = graphDB.findNode(NodeType1.entity, "id",
-						returnedEntity);
-				firstId = (String) firstEntity.getProperty("id");
-				// System.out.println("Entity Id "+firstId);
-				firstEntityAttributes = (String) firstEntity
-						.getProperty("attributes");
-				returnedActivity = checkEntity(firstEntity);
-				System.out.println("firstId " + firstId + "\t"
-						+ firstEntityAttributes);
-				System.out.println("retn Activity " + returnedActivity);
-				System.out.println("Activity Traversal");
-				System.out.println("Check Multiple Relationships");
-				System.out
-						.println("********************************************************");
-				Iterable<Relationship> rnship = activity1.getRelationships();
-				String checkEntityVisited = null;
+			if (firstsplit[1].toString().equals(secondsplit[1].toString())) {
 
-				System.out.println("Relationship Count "
-						+ activity1.getDegree());
-				for (Relationship rn : rnship) {
-					checkEntityVisited = (String) rn.getOtherNode(activity1)
-							.getProperty("id");
-					System.out.println("Entity Id " + checkEntityVisited);
-					System.out.println("first Id " + firstId);
-					// if(!firstId.contains(returnedEntity1))
-					if (!firstId.contains(checkEntityVisited)) {
-						// System.out.println("hi");
-						addVisited.add(checkEntityVisited);
+				Node activity1 = graphDB.findNode(NodeType1.activity, "id",
+						firstActivity);
+				Node activity2 = graphDB.findNode(NodeType1.activity, "id",
+						secondActivity);
+
+				System.out.println("Activity 1 and Activity 2 " + activity1
+						+ activity2);
+
+				List<String> addVisited = new ArrayList<String>();
+				List<String> addVisited1 = new ArrayList<String>();
+
+				List<String> addActivityVisited = new ArrayList<String>();
+				List<String> addActivityVisited1 = new ArrayList<String>();
+
+				String returnedEntity1 = checkactivity(activity1);
+				String returnedEntity2 = checkactivity(activity2);
+				do {
+					returnedEntity = checkactivity(activity1);
+					Node firstEntity = graphDB.findNode(NodeType1.entity, "id",
+							returnedEntity);
+
+					Iterable<Relationship> rnshipEntity = firstEntity
+							.getRelationships();
+					String checkActivityVisited = null;
+					System.out
+							.println("Checking multiple relationships of entity "
+									+ rnshipEntity.toString());
+					for (Relationship rn : rnshipEntity) {
+						System.out.println("First "
+								+ activity1.getProperty("id"));
+						checkActivityVisited = (String) rn.getOtherNode(
+								firstEntity).getProperty("id");
+						System.out.println(checkActivityVisited);
+						if (!(activity1.getProperty("id")).toString().contains(
+								checkActivityVisited)) {
+							addActivityVisited.add(checkActivityVisited);
+						}
 					}
-				}
-				System.out.println("addVisited " + addVisited.toString());
-				addVisited.remove(addVisited.size() - 1);
-				if (addVisited.contains(returnedEntity1)) {
-					addVisited.remove(returnedEntity1);
-				}
-				System.out.println("addVisited " + addVisited.toString());
-				// System.out.println("hi");
-				System.out.println("retn Activity " + returnedActivity);
+					System.out
+							.println("Printing multiple relationships of entity array"
+									+ addActivityVisited);
+					addActivityVisited.remove(addActivityVisited.size() - 1);
+					System.out
+							.println("Activity visited " + addActivityVisited);
 
-				firstActivityId = returnedActivity;
-				System.out.println("first Activity Id " + firstActivityId);
-				activity1 = graphDB.findNode(NodeType1.activity, "id",
-						firstActivityId);
-				System.out.println("first Activity Id " + firstActivityId);
-				// returnedSecondActivity = checkEntity(secondEntity);
+					firstId = (String) firstEntity.getProperty("id");
+					// System.out.println("Entity Id "+firstId);
+					firstEntityAttributes = (String) firstEntity
+							.getProperty("attributes");
+					returnedActivity = checkEntity(firstEntity);
+					System.out.println("firstId " + firstId + "\t"
+							+ firstEntityAttributes);
+					System.out.println("retn Activity " + returnedActivity);
+					System.out.println("Activity Traversal");
+					System.out.println("Check Multiple Relationships");
+					System.out
+							.println("********************************************************");
+					Iterable<Relationship> rnship = activity1
+							.getRelationships();
+					String checkEntityVisited = null;
 
-				returnedSecondEntity = checkactivity(activity2);
-				System.out.println(returnedSecondEntity);
-				Node secondEntity = graphDB.findNode(NodeType1.entity, "id",
-						returnedSecondEntity);
-				secondId = (String) secondEntity.getProperty("id");
-				secondEntityAttributes = (String) secondEntity
-						.getProperty("attributes");
-				returnedSecondActivity = checkEntity(secondEntity);
-				System.out.println("Activity Traversal");
-				System.out.println("Check Multiple Relationships");
-				System.out
-						.println("********************************************************");
-				Iterable<Relationship> rnship1 = activity2.getRelationships();
-				String checkEntityVisited1 = null;
-				System.out.println("Relationship Count "
-						+ activity2.getDegree());
-				for (Relationship rn : rnship1) {
-					checkEntityVisited1 = (String) rn.getOtherNode(activity2)
-							.getProperty("id");
-					if (!secondId.equals(checkEntityVisited1)) {
-						addVisited1.add(checkEntityVisited1);
+					System.out.println("Relationship Count "
+							+ activity1.getDegree());
+					for (Relationship rn : rnship) {
+						checkEntityVisited = (String) rn
+								.getOtherNode(activity1).getProperty("id");
+						// if(!firstId.contains(returnedEntity1))
+						if (!firstId.contains(checkEntityVisited)) {
+							// System.out.println("hi");
+							addVisited.add(checkEntityVisited);
+						}
 					}
-				}
-				addVisited1.remove(addVisited1.size() - 1);
-				if (addVisited1.contains(returnedEntity2)) {
-					addVisited1.remove(returnedEntity2);
-				}
-				// System.out.println("Check immediate***");
-				if (!(addVisited.isEmpty()) && !(addVisited1.isEmpty())) {
-					// System.out.println("Check immediate");
-					checkUnvisitedNodes(addVisited, addVisited1);
-					// System.out.println("**Check immediate**");
-					addVisited.clear();
-					addVisited1.clear();
-				}
-				try {
+					System.out.println("addVisited " + addVisited.toString());
+					addVisited.remove(addVisited.size() - 1);
+					if (addVisited.contains(returnedEntity1)) {
+						addVisited.remove(returnedEntity1);
+					}
+					System.out.println("addVisited " + addVisited.toString());
+					// System.out.println("hi");
+					System.out.println("retn Activity " + returnedActivity);
+
+					firstActivityId = returnedActivity;
+					System.out.println("first Activity Id " + firstActivityId);
+					activity1 = graphDB.findNode(NodeType1.activity, "id",
+							firstActivityId);
+					System.out.println("first Activity Id " + firstActivityId);
+					// returnedSecondActivity = checkEntity(secondEntity);
+
+					returnedSecondEntity = checkactivity(activity2);
+					System.out.println(returnedSecondEntity);
+					Node secondEntity = graphDB.findNode(NodeType1.entity,
+							"id", returnedSecondEntity);
+
+					Iterable<Relationship> rnshipEntity1 = secondEntity
+							.getRelationships();
+					String checkActivityVisited1 = null;
+					System.out
+							.println("Checking multiple relationships of entity 2"
+									+ rnshipEntity1.toString());
+					for (Relationship rn : rnshipEntity1) {
+						System.out.println("Second "
+								+ activity2.getProperty("id"));
+						checkActivityVisited1 = (String) rn.getOtherNode(
+								secondEntity).getProperty("id");
+						System.out.println(checkActivityVisited1);
+						if (!(activity2.getProperty("id").toString())
+								.contains(checkActivityVisited1)) {
+							addActivityVisited1.add(checkActivityVisited1);
+						}
+					}
+					System.out
+							.println("Printing multiple relationships of entity array 1 "
+									+ addActivityVisited1);
+					addActivityVisited1.remove(addActivityVisited1.size() - 1);
+					System.out.println("Activity visited 1 "
+							+ addActivityVisited1);
+
+					if (!(addActivityVisited.isEmpty())
+							&& !(addActivityVisited1.isEmpty())) {
+						// System.out.println("Check immediate");
+						checkUnvisitedActivityNodes1(addActivityVisited,
+								addActivityVisited1);
+						// System.out.println("**Check immediate**");
+						addActivityVisited.clear();
+						addActivityVisited1.clear();
+					}
+
+					secondId = (String) secondEntity.getProperty("id");
+					secondEntityAttributes = (String) secondEntity
+							.getProperty("attributes");
+					returnedSecondActivity = checkEntity(secondEntity);
+					System.out.println("Activity Traversal");
+					System.out.println("Check Multiple Relationships");
+					System.out
+							.println("********************************************************");
+					Iterable<Relationship> rnship1 = activity2
+							.getRelationships();
+					String checkEntityVisited1 = null;
+					System.out.println("Relationship Count "
+							+ activity2.getDegree());
+					for (Relationship rn : rnship1) {
+						checkEntityVisited1 = (String) rn.getOtherNode(
+								activity2).getProperty("id");
+						if (!secondId.equals(checkEntityVisited1)) {
+							addVisited1.add(checkEntityVisited1);
+						}
+					}
+					addVisited1.remove(addVisited1.size() - 1);
+					if (addVisited1.contains(returnedEntity2)) {
+						addVisited1.remove(returnedEntity2);
+					}
+					// System.out.println("Check immediate***");
+					if (!(addVisited.isEmpty()) && !(addVisited1.isEmpty())) {
+						// System.out.println("Check immediate");
+						checkUnvisitedNodes(addVisited, addVisited1);
+						// System.out.println("**Check immediate**");
+						addVisited.clear();
+						addVisited1.clear();
+					}
+
 					secondActivityId = returnedSecondActivity;
 					activity2 = graphDB.findNode(NodeType1.activity, "id",
 							secondActivityId);
-				} catch (NullPointerException ex) {
 
-				}
-				/*
-				 * firstActivityId = returnedActivity;
-				 * 
-				 * activity1 = graphDB.findNode(NodeType1.activity, "id",
-				 * firstActivityId);
-				 */
-				System.out.println("Comparing Entities " + firstId + "\t\t"
-						+ secondId);
-				compare(firstEntityAttributes, secondEntityAttributes);
-			} while (firstActivityId != null && secondActivityId != null);
-
+					/*
+					 * firstActivityId = returnedActivity;
+					 * 
+					 * activity1 = graphDB.findNode(NodeType1.activity, "id",
+					 * firstActivityId);
+					 */
+					System.out.println("Comparing Entities " + firstId + "\t\t"
+							+ secondId);
+					compare(firstEntityAttributes, secondEntityAttributes);
+				} while (firstActivityId != null && secondActivityId != null);
+			} else {
+				System.out.println("Invocation not matching");
+			}
 		} catch (Exception ex) {
 
 		}
 		long stopTime = System.currentTimeMillis();
 		long elapsedTime = stopTime - startTime;
 		System.out.println(elapsedTime);
+	}
+
+	private static void checkUnvisitedActivityNodes1(List<String> addVisited,
+			List<String> addVisited1) {
+		// TODO Auto-generated method stub
+
+		System.out.println("Display unvisted" + addVisited.toString());
+		System.out.println("Display unvisted 1" + addVisited1.toString());
+		for (int i = 0, j = 0; i < addVisited.size(); i++, j++) {
+			String DisplayId = addVisited.get(i);
+			String DisplayId2 = addVisited1.get(j);
+			try {
+				ResourceIterator<Node> missedentity1 = graphDB.findNodes(
+						NodeType1.activity, "id", DisplayId);
+				ResourceIterator<Node> missedentity2 = graphDB.findNodes(
+						NodeType1.activity, "id", DisplayId2);
+				Node missedFirstActivity = missedentity1.next();
+				Node missedSecondActivity = missedentity2.next();
+				System.out.println("Comparing Activities "
+						+ (String) missedFirstActivity.getProperty("id")
+						+ "\t\t"
+						+ (String) missedSecondActivity.getProperty("id"));
+				/*
+				 * compare((String)
+				 * missedFirstActivity.getProperty("attributes"), (String)
+				 * missedSecondActivity.getProperty("attributes"));
+				 */
+				String Entity1 = null;
+				String Entity2 = null;
+				do {
+					Entity1 = checkactivity1(missedFirstActivity);
+					Entity2 = checkactivity1(missedSecondActivity);
+					Node EntityNode1 = null;
+					Node EntityNode2 = null;
+					System.out.println("Entity null " + Entity1 + Entity2);
+					if (Entity1 != null && Entity2 != null) {
+						EntityNode1 = graphDB.findNode(NodeType1.activity,
+								"id", Entity1);
+						EntityNode2 = graphDB.findNode(NodeType1.activity,
+								"id", Entity2);
+						System.out.println("Display entity "
+								+ EntityNode1.getProperty("id") + " "
+								+ EntityNode2.getProperty("id"));
+					} else {
+						break;
+					}
+					String activity1 = checkEntity1(EntityNode1);
+					String activity2 = checkEntity1(EntityNode2);
+					try {
+						missedFirstActivity = graphDB.findNode(
+								NodeType1.entity, "id", activity1);
+						missedSecondActivity = graphDB.findNode(
+								NodeType1.entity, "id", activity2);
+					} catch (NullPointerException ex) {
+
+					}
+					System.out.println("check after ***");
+					System.out.println("Comparing Entities "
+							+ (String) missedFirstActivity.getProperty("id")
+							+ "\t\t"
+							+ (String) missedSecondActivity.getProperty("id"));
+					/*
+					 * compare((String) missedFirstActivity
+					 * .getProperty("attributes"), (String) missedSecondActivity
+					 * .getProperty("attributes"));
+					 */
+					System.out.println("check null");
+				} while (Entity1 != null && Entity2 != null);
+			} catch (Exception ex) {
+				System.out.println(ex.toString());
+			}
+		}
+
 	}
 
 	private static void checkUnvisitedNodes(List<String> addVisited,
@@ -432,4 +580,3 @@ public class TryFT {
 
 	}
 }
-
