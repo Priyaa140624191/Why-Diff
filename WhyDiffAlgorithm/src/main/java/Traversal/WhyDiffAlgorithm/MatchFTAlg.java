@@ -30,9 +30,9 @@ import Traversal.WhyDiffAlgorithm.NewMovie.RelationshipTypes;
 public class MatchFTAlg {
 	static long startTime = System.currentTimeMillis();
 	static GraphDatabaseService graphDB = new GraphDatabaseFactory()
-			.newEmbeddedDatabase("MultipleInvocations");
-	static String InvocationId1 = "132076";
-	static String InvocationId2 = "132084";
+			.newEmbeddedDatabase("Lib3");
+	static String InvocationId1 = "6471";
+	static String InvocationId2 = "5463";
 
 	static List<String> firstActivityList = null;
 	static List<String> secondActivityList = null;
@@ -57,9 +57,19 @@ public class MatchFTAlg {
 			compareFirstEntity(InvocationId1, InvocationId2);
 
 			Traverse(InvocationId1, InvocationId2);
-			
+
 			System.out.println("Listing Divergent nodes");
-			System.out.println(divergingNodeLists.toString());
+			System.out
+					.println("|-------------------------------------------------------------------------------------------------------------------------------------------------|");
+			for (int i = 0; i < divergingNodeLists.size(); i++) {
+				for (int j = 0; j < divergingNodes.size(); j++) {
+					System.out.print("|" + divergingNodeLists.get(i).get(j)
+							+ "|");
+				}
+				System.out.println("");
+			}
+			System.out
+					.println("|-------------------------------------------------------------------------------------------------------------------------------------------------|");
 
 		} catch (Exception ex) {
 			System.out.println(ex.toString());
@@ -132,7 +142,7 @@ public class MatchFTAlg {
 					+ "\t" + secondActivityList.toString());
 
 			for (String firstActivity : firstActivityList) {
-				System.out.println(secondActivityList.toString());
+
 				for (String secondActivity : secondActivityList) {
 
 					Node firstActivityNode = graphDB.findNode(
@@ -172,7 +182,9 @@ public class MatchFTAlg {
 										returned1Entity.getProperty("id")
 												.toString(), returned2Entity
 												.getProperty("id").toString());
-								if (!isEqual) {
+								boolean added = divergingNodeLists.toString().contains(returned1Entity
+										.getProperty("id").toString());
+								if ((!isEqual) && (!added)) {
 									divergingNodes = new ArrayList<String>();
 									divergingNodes.add(returned1Entity
 											.getProperty("id").toString());
@@ -189,45 +201,38 @@ public class MatchFTAlg {
 															.getProperty("id"));
 									ResourceIterable<Node> returned2ActivityList = getUsed(returned2Entity);
 
-									if (returned1ActivityList.iterator()
-											.hasNext()
-											&& returned1ActivityList.iterator()
-													.hasNext()) {
-										for (Node returnActivity1 : returned1ActivityList) {
-											for (Node returnActivity2 : returned2ActivityList) {
-												boolean activityzip = isActivityZipped(
-														returnActivity1
-																.getProperty(
-																		"id")
-																.toString(),
-														returnActivity2
+									for (Node returnActivity1 : returned1ActivityList) {
+										for (Node returnActivity2 : returned2ActivityList) {
+											boolean activityzip = isActivityZipped(
+													returnActivity1
+															.getProperty("id")
+															.toString(),
+													returnActivity2
+															.getProperty("id")
+															.toString());
+											if (activityzip == true) {
+												firstActivityNewList
+														.add(returnActivity1
 																.getProperty(
 																		"id")
 																.toString());
-												if (activityzip == true) {
-													firstActivityNewList
-															.add(returnActivity1
-																	.getProperty(
-																			"id")
-																	.toString());
-													secondActivityNewList
-															.add(returnActivity2
-																	.getProperty(
-																			"id")
-																	.toString());
+												secondActivityNewList
+														.add(returnActivity2
+																.getProperty(
+																		"id")
+																.toString());
 
-													System.out
-															.println(returnActivity1
-																	.getProperty(
-																			"id")
-																	.toString()
-																	+ "\t"
-																	+ returnActivity2
-																			.getProperty(
-																					"id")
-																			.toString());
+												System.out.println("check "
+														+ returnActivity1
+																.getProperty(
+																		"id")
+																.toString()
+														+ "\t"
+														+ returnActivity2
+																.getProperty(
+																		"id")
+																.toString());
 
-												}
 											}
 										}
 									}
@@ -258,10 +263,11 @@ public class MatchFTAlg {
 
 	private static boolean isActivityZipped(String firstActivity,
 			String secondActivity) {
+		String initial = firstActivity.substring(0, 11);
 		boolean isZipped = false;
-		String[] firstsplit = firstActivity.split("esc:svi-esc/invocation/"
+		String[] firstsplit = firstActivity.split(initial+"/invocation/"
 				+ InvocationId1 + "/block/");
-		String[] secondsplit = secondActivity.split("esc:svi-esc/invocation/"
+		String[] secondsplit = secondActivity.split(initial+"/invocation/"
 				+ InvocationId2 + "/block/");
 
 		if (firstsplit[1].toString().contains(secondsplit[1].toString())) {
@@ -302,15 +308,21 @@ public class MatchFTAlg {
 
 		boolean compare = false;
 		String checkString1 = "'esc:hashvalue'";
-		if (EntityAttributes1.contains(checkString1)
-				&& EntityAttributes2.contains(checkString1)) {
-			compare = checkFurtherEntityEqual(EntityAttributes1,
-					EntityAttributes2);
+		if (firstEntityId.contains("tr") && secondEntityId.contains("tr")) {
+			if (EntityAttributes1.equals(EntityAttributes2))
+				compare = true;
+			else if (EntityAttributes1.contains(checkString1)
+					&& EntityAttributes2.contains(checkString1)) {
+				compare = checkFurtherEntityEqual(EntityAttributes1,
+						EntityAttributes2);
+			}
 		} else {
-
-			compare = checkFirstEntityEqual(EntityAttributes1,
-					EntityAttributes2);
+			if (EntityAttributes1.equals(EntityAttributes1)) {
+				compare = checkFirstEntityEqual(EntityAttributes1,
+						EntityAttributes2);
+			}
 		}
+
 		return compare;
 	}
 
