@@ -30,9 +30,9 @@ import Traversal.WhyDiffAlgorithm.NewMovie.RelationshipTypes;
 public class MatchBTAlg {
 	static long startTime = System.currentTimeMillis();
 	static GraphDatabaseService graphDB = new GraphDatabaseFactory()
-			.newEmbeddedDatabase("MultipleInvocations");
-	static String InvocationId1 = "132076";
-	static String InvocationId2 = "132084";
+			.newEmbeddedDatabase("Lib3");
+	static String InvocationId1 = "6471";
+	static String InvocationId2 = "5463";
 	static List<List<String>> divergingNodeLists = new ArrayList<List<String>>();
 	static List<String> divergingNodes = new ArrayList<String>();
 	static List<String> firstActivityList = null;
@@ -55,10 +55,19 @@ public class MatchBTAlg {
 			compareFirstEntity(InvocationId1, InvocationId2);
 
 			Traverse(InvocationId1, InvocationId2);
-			
-			System.out.println("Listing Divergent nodes");
-			System.out.println(divergingNodeLists.toString());
 
+			System.out.println("Listing Divergent nodes");
+			System.out
+					.println("|-------------------------------------------------------------------------------------------------------------------------------------------------|");
+			for (int i = 0; i < divergingNodeLists.size(); i++) {
+				for (int j = 0; j < divergingNodes.size(); j++) {
+					System.out.print("|" + divergingNodeLists.get(i).get(j)
+							+ "|");
+				}
+				System.out.println("");
+			}
+			System.out
+					.println("|-------------------------------------------------------------------------------------------------------------------------------------------------|");
 		} catch (Exception ex) {
 			System.out.println(ex.toString());
 
@@ -129,12 +138,6 @@ public class MatchBTAlg {
 
 					ResourceIterable<Node> returnedEntity1List = getUsed(firstActivityNode);
 					ResourceIterable<Node> returnedEntity2List = getUsed(SecondActivityNode);
-					System.out.println("Returned Entity1List "
-							+ returnedEntity1List.iterator().next()
-									.getProperty("id")
-							+ "\t"
-							+ returnedEntity2List.iterator().next()
-									.getProperty("id"));
 					for (Node returned1Entity : returnedEntity1List) {
 						for (Node returned2Entity : returnedEntity2List) {
 							lastEntityId1 = returned1Entity.getProperty("id")
@@ -185,7 +188,14 @@ public class MatchBTAlg {
 																	.getProperty(
 																			"properties")
 																	.toString());
-													if (!isEqual) {
+													boolean added = divergingNodeLists
+															.toString()
+															.contains(
+																	returnActivity1
+																			.getProperty(
+																					"id")
+																			.toString());
+													if (!isEqual && !added) {
 														divergingNodes = new ArrayList<String>();
 														divergingNodes
 																.add(returnActivity1
@@ -255,7 +265,6 @@ public class MatchBTAlg {
 				String[] provLabel2 = ActivityAttributes2.split(checkString2);
 				// System.out.println("starting index:" + provLabel);
 				// int provType2 = checkString2.length();
-
 				if (provLabel1[1].toString().equals(provLabel2[1].toString())) {
 					System.out.println("Both activities are equal ");
 					compare = true;
@@ -271,10 +280,11 @@ public class MatchBTAlg {
 
 	private static boolean isActivityZipped(String firstActivity,
 			String secondActivity) {
+		String initial = firstActivity.substring(0, 11);
 		boolean isZipped = false;
-		String[] firstsplit = firstActivity.split("esc:svi-esc/invocation/"
+		String[] firstsplit = firstActivity.split(initial + "/invocation/"
 				+ InvocationId1 + "/block/");
-		String[] secondsplit = secondActivity.split("esc:svi-esc/invocation/"
+		String[] secondsplit = secondActivity.split(initial + "/invocation/"
 				+ InvocationId2 + "/block/");
 
 		if (firstsplit[1].toString().contains(secondsplit[1].toString())) {
@@ -288,7 +298,6 @@ public class MatchBTAlg {
 		boolean ifZipped = false;
 		if (EntityAttributes1.contains("tr")
 				&& EntityAttributes2.contains("tr")) {
-			System.out.println("Inside this if");
 			String[] check1String = EntityAttributes1.toString().split("-");
 
 			String[] check2String = EntityAttributes2.toString().split("-");
