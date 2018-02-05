@@ -31,12 +31,12 @@ import Traversal.WhyDiffAlgorithm.NewMovie.RelationshipTypes;
 @SuppressWarnings({ "deprecation", "unused" })
 public class BTForNonIso {
 	static GraphDatabaseService graphDB = new GraphDatabaseFactory()
-			.newEmbeddedDatabase("CreateGraph1");
+			.newEmbeddedDatabase("Final1");
 
 	static int inputCount = 0;
 
 	static String InvocationId1 = "140104";
-	static String InvocationId2 = "140102";
+	static String InvocationId2 = "140103";
 
 	static List<List<String>> divergingNodeLists = new ArrayList<List<String>>();
 	static List<String> divergingNodes = new ArrayList<String>();
@@ -63,7 +63,7 @@ public class BTForNonIso {
 
 	private static List<String> firstExtra = new ArrayList<String>();
 	private static List<String> secondExtra = new ArrayList<String>();
-	
+
 	private static char format;
 
 	/*************** GRAPH VISUALISATION **************/
@@ -76,6 +76,9 @@ public class BTForNonIso {
 
 	private static List<String> firstAct = new ArrayList<String>();
 	private static List<String> secondAct = new ArrayList<String>();
+
+	private static List<String> firstAll = new ArrayList<String>();
+	private static List<String> secondAll = new ArrayList<String>();
 
 	private static List<String> firstGraph = new ArrayList<String>();
 	private static List<String> secondGraph = new ArrayList<String>();
@@ -91,7 +94,13 @@ public class BTForNonIso {
 	private static int previousNodeCountGen1 = 0;
 	private static int previousNodeCountGen2 = 0;
 
-	static List<String> deltaList = new ArrayList<String>();
+	private static List<String> deltaList = new ArrayList<String>();
+
+	private static List<String> deltaActList = new ArrayList<String>();
+
+	private static List<String> divergingActList = new ArrayList<String>();
+
+	private static ArrayList<String> deltaEntList = new ArrayList<String>();
 
 	/*************** GRAPH VISUALISATION **************/
 
@@ -100,19 +109,7 @@ public class BTForNonIso {
 		try (Transaction tx = graphDB.beginTx()) {
 
 			boolean visited = false;
-			/*
-			 * int firstInvocationCount = findEntityCount(InvocationId1);
-			 * inputCount = 0; int secondInvocationCount =
-			 * findEntityCount(InvocationId2);
-			 * 
-			 * System.out.println("Total node count " + "1st " +
-			 * firstInvocationCount + "2nd " + secondInvocationCount);
-			 * 
-			 * if (firstInvocationCount < secondInvocationCount) { String tempId
-			 * = InvocationId1; InvocationId1 = InvocationId2; InvocationId2 =
-			 * tempId; }
-			 */
-
+			
 			compareFirstEntity(InvocationId1, InvocationId2);
 			Traverse(InvocationId1, InvocationId2);
 			compareLastEntity(InvocationId1, InvocationId2);
@@ -177,13 +174,17 @@ public class BTForNonIso {
 			System.out.println(secondEnt.toString());
 			System.out.println(firstAct.toString());
 			System.out.println(secondAct.toString());
+			System.out.println(firstAll.toString());
+			System.out.println(secondAll.toString());
+
 			System.out
 					.println("---------------------------------------------------");
 
 			Proba p = new Proba();
 			p.makeGraph(firstGraph, firstEnt, firstAct, secondGraph, secondEnt,
 					secondAct);
-			p.makeDelta(deltaList, firstAct);
+
+			p.makeDelta(deltaList, deltaActList, deltaEntList);
 
 			Display d = new Display();
 			d.display();
@@ -202,13 +203,44 @@ public class BTForNonIso {
 		System.out.println("Last entity 1" + firstEnt.get(firstEnt.size() - 1));
 		System.out.println("Last entity 2"
 				+ secondEnt.get(secondEnt.size() - 1));
-		deltaList = new ArrayList<String>(firstGraph);
+		deltaList = new ArrayList<String>();
 
-		deltaList.remove(deltaList.get(deltaList.size() - 1));
-		deltaList.remove(deltaList.get(0));
+		deltaList.addAll(firstGraph);
 
-		deltaList.add(0, firstEnt.get(0) + "_" + secondEnt.get(0) + "->"
-				+ firstAct.get(0));
+		deltaList.addAll(secondGraph);
+
+		System.out.println("Delta before " + deltaList.toString());
+
+		System.out.println("First All before " + firstAll.toString());
+
+		System.out.println("Second All before " + secondAll.toString());
+
+		deltaActList = new ArrayList<String>();
+		deltaActList.addAll(firstAct);
+		deltaActList.addAll(secondAct);
+
+		System.out.println("Delta Act List Before" + deltaActList.toString());
+
+		deltaEntList = new ArrayList<String>();
+		deltaEntList.addAll(firstEnt);
+		deltaEntList.addAll(secondEnt);
+
+		System.out.println(firstEnt.get(firstEnt.size()-1));
+		System.out.println(secondEnt.get(secondEnt.size() - 1));
+		
+		deltaList.remove(firstGraph.get(firstGraph.size()-1));
+		deltaList.remove(secondGraph.get(secondGraph.size() - 1));
+		
+		deltaEntList.remove(firstEnt.get(firstEnt.size()-1));
+
+		// deltaList.remove(deltaList.get(0));
+
+		/*
+		 * deltaList.add(0, firstEnt.get(0) + "_" + secondEnt.get(0) + "->" +
+		 * firstAct.get(0));
+		 */
+
+		// deltaList.add(0, firstEnt.get(0) + "_" + secondEnt.get(0));
 		deltaList.add(firstAct.get(firstAct.size() - 1) + "->"
 				+ firstEnt.get(firstEnt.size() - 1) + "_"
 				+ secondEnt.get(secondEnt.size() - 1));
@@ -217,13 +249,171 @@ public class BTForNonIso {
 				.size();
 		for (int i = 0; i < length; i++) {
 			for (int j = 0; j < second.size(); j++) {
-				if(first.get(i).toString().contains("invocation") && second.get(j).toString().contains("invocation"))
-				 if (isActivityZipped(first.get(i).toString(), second.get(j).toString()))
-					System.out.println(first.get(i).toString());
+				if (first.get(i).toString().contains("invocation")
+						&& second.get(j).toString().contains("invocation")) {
+					if (isActivityZipped1(first.get(i).toString(), second
+							.get(j).toString())
+							&& firstAll.get(i).contains("a")
+							&& secondAll.get(j).contains("a")) {
+						for (int k = 0; k < deltaList.size(); k++) {
+							if (deltaList.get(k).contains(firstAll.get(i))
+									|| deltaList.get(k).contains(
+											secondAll.get(j))) {
+								String originalString = deltaList.get(k)
+										.toString();
+								String edittedString = firstAll.get(i)
+										.toString()
+										+ "_"
+										+ secondAll.get(j).toString();
+								System.out
+										.println("Activity Matched Index of nodes to be changed "
+												+ deltaList.get(k)
+												+ " to "
+												+ edittedString);
+								deltaList.remove(k);
+								if (!deltaList.toString().contains(
+										originalString.replace(firstAll.get(i)
+												.toString(), edittedString)))
+									deltaList.add(k, originalString.replace(
+											firstAll.get(i).toString(),
+											edittedString));
+
+								for (int p = 0; p < deltaActList.size(); p++) {
+									if (deltaActList.get(p).contains(
+											firstAll.get(i))) {
+										deltaActList.remove(p);
+										if (!deltaActList.toString().contains(
+												edittedString)) {
+											if (divergingNodeLists.toString()
+													.contains(first.get(i).toString())&& divergingNodeLists.toString()
+															.contains(second.get(j).toString()))
+												deltaActList
+														.add(p,
+																edittedString
+																		+ "[shape=box][style=filled, fillcolor=mediumspringgreen, color=orangered]");
+											else
+												deltaActList
+														.add(p,
+																edittedString
+																		+ "[shape=box][style=filled][fillcolor = mediumspringgreen];");
+										}
+									}
+								}
+
+							}
+						}
+					} else {
+						System.out.println(i);
+						System.out.println(first.get(i).toString());
+						System.out.println("******* delta" + deltaList.get(i));
+
+						for (int k = 0; k < deltaList.size(); k++) {
+							/*if (!deltaList.get(k).contains("->"))
+								deltaList.remove(deltaList.get(k));*/
+							if (deltaList.get(k).contains(firstAll.get(i))
+									|| deltaList.get(k).contains(
+											secondAll.get(j))) {
+								System.out
+										.println("Activity not matching Index of nodes to be changed "
+												+ deltaList.get(k));
+								String originalString = deltaList.get(k)
+										.toString();
+								String edittedString = firstAll.get(i)
+										.toString();
+								deltaList.remove(k);
+
+								if (!deltaList.toString().contains(
+										originalString.replace(firstAll.get(i)
+												.toString(), edittedString)))
+									deltaList.add(k, originalString.replace(
+											firstAll.get(i).toString(),
+											edittedString));
+								System.out
+										.println("Reached activity not matched");
+							}
+						}
+					}
+				} else {
+					if (IsZipped1(first.get(i).toString(), second.get(j)
+							.toString())) {
+						for (int k = 0; k < deltaList.size(); k++) {
+							if (deltaList.get(k).contains(firstAll.get(i))
+									|| deltaList.get(k).contains(
+											secondAll.get(j))) {
+								System.out
+										.println("Entity Index of nodes to be changed "
+												+ deltaList.get(k));
+								String originalString = deltaList.get(k)
+										.toString();
+								String edittedString = firstAll.get(i)
+										.toString()
+										+ "_"
+										+ secondAll.get(j).toString();
+								deltaList.remove(k);
+
+								if (!deltaList.toString().contains(
+										originalString.replace(firstAll.get(i)
+												.toString(), edittedString)))
+									deltaList.add(k, originalString.replace(
+											firstAll.get(i).toString(),
+											edittedString));
+								for (int p = 0; p < deltaEntList.size(); p++) {
+									if (deltaEntList.get(p).contains(
+											firstAll.get(i))) {
+										deltaEntList.remove(p);
+										if (!deltaEntList.toString().contains(
+												edittedString)) {
+											if (divergingNodeLists.toString()
+													.contains(first.get(i).toString())&& divergingNodeLists.toString()
+															.contains(second.get(j).toString()))
+												deltaEntList
+														.add(p,
+																edittedString
+																		+ "[style=filled, fillcolor = pink, color=orangered]");
+											else
+												deltaEntList
+														.add(p,
+																edittedString
+																		+ "[style=filled][fillcolor = pink];");
+										}
+									}
+								}
+							}
+						}
+					}
+
+				}
 			}
 		}
+		System.out.println("Second All List "+secondGraph.toString());
+		for(int i=0;i<deltaList.size();i++)
+		{
+			for(int j=0;j<secondGraph.size();j++)
+			{
+				if(secondGraph.get(j).toString().equals(deltaList.get(i).toString()))
+					deltaList.remove(i);
+			}
+		}
+		for(int i=0;i<deltaActList.size();i++)
+		{
+			for(int j=0;j<secondAct.size();j++)
+			{
+				if(secondAct.get(j).toString().equals(deltaActList.get(i).toString()))
+					deltaActList.remove(i);
+			}
+		}
+		
+		for(int i=0;i<deltaEntList.size();i++)
+		{
+			for(int j=0;j<secondEnt.size();j++)
+			{
+				if(secondEnt.get(j).toString().equals(deltaEntList.get(i).toString()))
+					deltaEntList.remove(i);
+			}
+		}
+		
 		System.out.println("Delta List " + deltaList.toString());
-
+		System.out.println("deltaActList " + deltaActList.toString());
 	}
 
 	private static void reSyncing() {
@@ -336,6 +526,7 @@ public class BTForNonIso {
 			first.add(firstEntity);
 			if (countEntity1 != 0) {
 				firstEnt.add("e\u2081" + countEntity1);
+				firstAll.add("e\u2081" + countEntity1);
 				/*
 				 * firstGraph.add(firstAct.get(countActivity1-1) + "<-e" +
 				 * countEntity1);
@@ -344,6 +535,8 @@ public class BTForNonIso {
 			} else {
 				firstEnt.add("e\u2081" + countEntity1);
 				firstAct.add("a\u2081" + countActivity1);
+				firstAll.add("e\u2081" + countEntity1);
+				firstAll.add("a\u2081" + countActivity1);
 				firstGraph.add("e\u2081" + countEntity1 + "->"
 						+ firstAct.get(countActivity1));
 				// ++countActivity1;
@@ -357,6 +550,7 @@ public class BTForNonIso {
 			second.add(secondEntity);
 			if (countEntity2 != 0) {
 				secondEnt.add("e\u2082" + countEntity2);
+				secondAll.add("e\u2082" + countEntity2);
 				/*
 				 * secondGraph.add(secondAct.get(countActivity2-1) + "<-e" +
 				 * countEntity2);
@@ -364,6 +558,8 @@ public class BTForNonIso {
 			} else {
 				secondEnt.add("e\u2082" + countEntity2);
 				secondAct.add("a\u2082" + countActivity2);
+				secondAll.add("e\u2082" + countEntity2);
+				secondAll.add("a\u2082" + countActivity2);
 				secondGraph.add("e\u2082" + countEntity2 + "->"
 						+ secondAct.get(countActivity2));
 				// ++countActivity2;
@@ -377,6 +573,7 @@ public class BTForNonIso {
 			first.add(firstActivity);
 			System.out.println("checkpoint entity");
 			firstAct.add("a\u2081" + countActivity1);
+			firstAll.add("a\u2081" + countActivity1);
 			/*
 			 * firstGraph.add(firstEnt.get(countEntity1 - 1) + "<-a" +
 			 * countActivity1);
@@ -390,6 +587,7 @@ public class BTForNonIso {
 			second.add(firstActivity);
 			System.out.println("checkpoint entity2");
 			secondAct.add("a\u2082" + countActivity2);
+			secondAll.add("a\u2082" + countActivity2);
 			/*
 			 * secondGraph.add(secondEnt.get(countEntity2 - 1) + "<-a" +
 			 * countActivity2);
@@ -492,6 +690,10 @@ public class BTForNonIso {
 			for (String firstActivity : firstActivityList) {
 				System.out.println(secondActivityList.toString());
 				for (String secondActivity : secondActivityList) {
+					if (!first.toString().contains(firstActivity.toString()))
+						first.add(firstActivity.toString());
+					if (!second.toString().contains(firstActivity.toString()))
+						second.add(secondActivity.toString());
 					/*
 					 * firstAct.add("a" + countActivity1); secondAct.add("a" +
 					 * countActivity2);
@@ -827,6 +1029,21 @@ public class BTForNonIso {
 		return isZipped;
 	}
 
+	private static boolean isActivityZipped1(String firstActivity,
+			String secondActivity) {
+		String initial = firstActivity.substring(0, 11);
+		boolean isZipped = false;
+
+		String[] firstsplit = firstActivity.split(initial + "/invocation/"
+				+ InvocationId1 + "/block/");
+		String[] secondsplit = secondActivity.split(initial + "/invocation/"
+				+ InvocationId2 + "/block/");
+		if (firstsplit[1].toString().contains(secondsplit[1].toString())) {
+			isZipped = true;
+		}
+		return isZipped;
+	}
+
 	private static boolean IsZipped(String EntityAttributes1,
 			String EntityAttributes2) {
 		boolean ifZipped = false;
@@ -843,8 +1060,7 @@ public class BTForNonIso {
 			System.out.println("Entity1 " + Entity1 + "Entity 2" + Entity2);
 			if (Entity1.equals(Entity2)) {
 				ifZipped = true;
-				System.out.println("Diverging Node at this point "
-						+ divergingNodeLists.toString());
+
 				/****
 				 * To remove duplicate comparison
 				 */
@@ -888,7 +1104,30 @@ public class BTForNonIso {
 				ifZipped = true;
 			}
 		}
-		System.out.println("ifZipped " + ifZipped);
+		return ifZipped;
+	}
+
+	private static boolean IsZipped1(String EntityAttributes1,
+			String EntityAttributes2) {
+		boolean ifZipped = false;
+		if (EntityAttributes1.contains("tr")
+				&& EntityAttributes2.contains("tr")) {
+			String[] check1String = EntityAttributes1.toString().split("-");
+			String[] check2String = EntityAttributes2.toString().split("-");
+			String Entity1 = EntityAttributes1.toString()
+					.substring(EntityAttributes1.indexOf(check1String[6]))
+					.toString();
+			String Entity2 = EntityAttributes2.toString()
+					.substring(EntityAttributes2.indexOf(check2String[6]))
+					.toString();
+			if (Entity1.equals(Entity2)) {
+				ifZipped = true;
+			}
+		} else {
+			if (EntityAttributes1.equals(EntityAttributes2)) {
+				ifZipped = true;
+			}
+		}
 		return ifZipped;
 	}
 
