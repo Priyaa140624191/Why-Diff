@@ -31,12 +31,12 @@ import Traversal.WhyDiffAlgorithm.NewMovie.RelationshipTypes;
 @SuppressWarnings({ "deprecation", "unused" })
 public class BTForNonIso {
 	static GraphDatabaseService graphDB = new GraphDatabaseFactory()
-			.newEmbeddedDatabase("Final1");
+			.newEmbeddedDatabase("Graph");
 
 	static int inputCount = 0;
 
 	static String InvocationId1 = "140104";
-	static String InvocationId2 = "140103";
+	static String InvocationId2 = "140102";
 
 	static List<List<String>> divergingNodeLists = new ArrayList<List<String>>();
 	static List<String> divergingNodes = new ArrayList<String>();
@@ -191,7 +191,6 @@ public class BTForNonIso {
 
 		} catch (Exception ex) {
 			System.out.println(ex.toString());
-
 		}
 	}
 
@@ -203,17 +202,17 @@ public class BTForNonIso {
 		System.out.println("Last entity 1" + firstEnt.get(firstEnt.size() - 1));
 		System.out.println("Last entity 2"
 				+ secondEnt.get(secondEnt.size() - 1));
+		
 		deltaList = new ArrayList<String>();
 
 		deltaList.addAll(firstGraph);
-
 		deltaList.addAll(secondGraph);
 
 		System.out.println("Delta before " + deltaList.toString());
-
-		System.out.println("First All before " + firstAll.toString());
-
-		System.out.println("Second All before " + secondAll.toString());
+		System.out.println("First All before " + firstAll.size());
+		System.out.println("First size"+first.size());
+		System.out.println("Second All before " + secondAll.size());
+		System.out.println("Second size "+second.size());
 
 		deltaActList = new ArrayList<String>();
 		deltaActList.addAll(firstAct);
@@ -225,8 +224,6 @@ public class BTForNonIso {
 		deltaEntList.addAll(firstEnt);
 		deltaEntList.addAll(secondEnt);
 
-		System.out.println(firstEnt.get(firstEnt.size()-1));
-		System.out.println(secondEnt.get(secondEnt.size() - 1));
 		
 		deltaList.remove(firstGraph.get(firstGraph.size()-1));
 		deltaList.remove(secondGraph.get(secondGraph.size() - 1));
@@ -244,6 +241,14 @@ public class BTForNonIso {
 		deltaList.add(firstAct.get(firstAct.size() - 1) + "->"
 				+ firstEnt.get(firstEnt.size() - 1) + "_"
 				+ secondEnt.get(secondEnt.size() - 1));
+		
+		if(divergingNodeLists.toString().contains(first.get(first.size()-1).toString())&& 
+				divergingNodeLists.toString().contains(second.get(second.size()-1).toString()))
+		deltaEntList.add(firstEnt.get(firstEnt.size() - 1) + "_"
+				+ secondEnt.get(secondEnt.size() - 1)+"[style=filled, fillcolor = pink, color=orangered]");
+		else
+			deltaEntList.add(firstEnt.get(firstEnt.size() - 1) + "_"
+					+ secondEnt.get(secondEnt.size() - 1)+"[style=filled, fillcolor = pink");
 
 		int length = (first.size() >= second.size()) ? first.size() : second
 				.size();
@@ -251,17 +256,20 @@ public class BTForNonIso {
 			for (int j = 0; j < second.size(); j++) {
 				if (first.get(i).toString().contains("invocation")
 						&& second.get(j).toString().contains("invocation")) {
+					
 					if (isActivityZipped1(first.get(i).toString(), second
-							.get(j).toString())
-							&& firstAll.get(i).contains("a")
-							&& secondAll.get(j).contains("a")) {
+							.get(j).toString())&& firstAll.get(i).contains("a") && secondAll.get(j).contains("a")) {
+						
 						for (int k = 0; k < deltaList.size(); k++) {
-							if (deltaList.get(k).contains(firstAll.get(i))
-									|| deltaList.get(k).contains(
-											secondAll.get(j))) {
+							
+							if (deltaList.get(k).contains(firstAll.get(i)) || deltaList.get(k).contains(
+									secondAll.get(j)))
+								{
 								String originalString = deltaList.get(k)
 										.toString();
 								String edittedString = firstAll.get(i)
+										.toString();
+								 edittedString = firstAll.get(i)
 										.toString()
 										+ "_"
 										+ secondAll.get(j).toString();
@@ -302,24 +310,18 @@ public class BTForNonIso {
 
 							}
 						}
-					} else {
-						System.out.println(i);
-						System.out.println(first.get(i).toString());
-						System.out.println("******* delta" + deltaList.get(i));
-
+					}else {
 						for (int k = 0; k < deltaList.size(); k++) {
-							/*if (!deltaList.get(k).contains("->"))
-								deltaList.remove(deltaList.get(k));*/
+							/*if (deltaList.get(k).contains(firstAll.get(i)))*/ 
 							if (deltaList.get(k).contains(firstAll.get(i))
 									|| deltaList.get(k).contains(
-											secondAll.get(j))) {
-								System.out
-										.println("Activity not matching Index of nodes to be changed "
-												+ deltaList.get(k));
+											secondAll.get(j))){
 								String originalString = deltaList.get(k)
 										.toString();
+								
 								String edittedString = firstAll.get(i)
 										.toString();
+								
 								deltaList.remove(k);
 
 								if (!deltaList.toString().contains(
@@ -336,6 +338,7 @@ public class BTForNonIso {
 				} else {
 					if (IsZipped1(first.get(i).toString(), second.get(j)
 							.toString())) {
+
 						for (int k = 0; k < deltaList.size(); k++) {
 							if (deltaList.get(k).contains(firstAll.get(i))
 									|| deltaList.get(k).contains(
@@ -414,6 +417,7 @@ public class BTForNonIso {
 		
 		System.out.println("Delta List " + deltaList.toString());
 		System.out.println("deltaActList " + deltaActList.toString());
+		System.out.println("deltaEntList " + deltaEntList.toString());
 	}
 
 	private static void reSyncing() {
@@ -692,7 +696,7 @@ public class BTForNonIso {
 				for (String secondActivity : secondActivityList) {
 					if (!first.toString().contains(firstActivity.toString()))
 						first.add(firstActivity.toString());
-					if (!second.toString().contains(firstActivity.toString()))
+					if (!second.toString().contains(secondActivity.toString()))
 						second.add(secondActivity.toString());
 					/*
 					 * firstAct.add("a" + countActivity1); secondAct.add("a" +
@@ -1057,7 +1061,7 @@ public class BTForNonIso {
 			String Entity2 = EntityAttributes2.toString()
 					.substring(EntityAttributes2.indexOf(check2String[6]))
 					.toString();
-			System.out.println("Entity1 " + Entity1 + "Entity 2" + Entity2);
+			System.out.println("Entity1 " + Entity1 + "Entity 2 " + Entity2);
 			if (Entity1.equals(Entity2)) {
 				ifZipped = true;
 
@@ -1068,7 +1072,7 @@ public class BTForNonIso {
 					if (divergingNodeLists.get(i).toString().contains(Entity1)) {
 						divergingNodeLists.remove(divergingNodeLists.get(i));
 					}
-					if (divergingNodeLists.get(i).toString().contains(Entity2)) {
+					else if (divergingNodeLists.get(i).toString().contains(Entity2)) {
 						divergingNodeLists.remove(divergingNodeLists.get(i));
 					}
 				}
