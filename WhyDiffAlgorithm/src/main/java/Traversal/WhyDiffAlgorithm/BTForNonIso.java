@@ -31,12 +31,12 @@ import Traversal.WhyDiffAlgorithm.NewMovie.RelationshipTypes;
 @SuppressWarnings({ "deprecation", "unused" })
 public class BTForNonIso {
 	static GraphDatabaseService graphDB = new GraphDatabaseFactory()
-			.newEmbeddedDatabase("Graph");
+			.newEmbeddedDatabase("TestSet5");
 
 	static int inputCount = 0;
 
 	static String InvocationId1 = "140104";
-	static String InvocationId2 = "140102";
+	static String InvocationId2 = "140022";
 
 	static List<List<String>> divergingNodeLists = new ArrayList<List<String>>();
 	static List<String> divergingNodes = new ArrayList<String>();
@@ -238,6 +238,7 @@ public class BTForNonIso {
 		 */
 
 		// deltaList.add(0, firstEnt.get(0) + "_" + secondEnt.get(0));
+		
 		deltaList.add(firstAct.get(firstAct.size() - 1) + "->"
 				+ firstEnt.get(firstEnt.size() - 1) + "_"
 				+ secondEnt.get(secondEnt.size() - 1));
@@ -273,11 +274,6 @@ public class BTForNonIso {
 										.toString()
 										+ "_"
 										+ secondAll.get(j).toString();
-								System.out
-										.println("Activity Matched Index of nodes to be changed "
-												+ deltaList.get(k)
-												+ " to "
-												+ edittedString);
 								deltaList.remove(k);
 								if (!deltaList.toString().contains(
 										originalString.replace(firstAll.get(i)
@@ -303,7 +299,7 @@ public class BTForNonIso {
 												deltaActList
 														.add(p,
 																edittedString
-																		+ "[shape=box][style=filled][fillcolor = mediumspringgreen];");
+																		+ "[shape=box][style=filled,fillcolor = mediumspringgreen];");
 										}
 									}
 								}
@@ -312,7 +308,6 @@ public class BTForNonIso {
 						}
 					}else {
 						for (int k = 0; k < deltaList.size(); k++) {
-							/*if (deltaList.get(k).contains(firstAll.get(i)))*/ 
 							if (deltaList.get(k).contains(firstAll.get(i))
 									|| deltaList.get(k).contains(
 											secondAll.get(j))){
@@ -330,8 +325,6 @@ public class BTForNonIso {
 									deltaList.add(k, originalString.replace(
 											firstAll.get(i).toString(),
 											edittedString));
-								System.out
-										.println("Reached activity not matched");
 							}
 						}
 					}
@@ -343,23 +336,23 @@ public class BTForNonIso {
 							if (deltaList.get(k).contains(firstAll.get(i))
 									|| deltaList.get(k).contains(
 											secondAll.get(j))) {
-								System.out
-										.println("Entity Index of nodes to be changed "
-												+ deltaList.get(k));
 								String originalString = deltaList.get(k)
 										.toString();
 								String edittedString = firstAll.get(i)
 										.toString()
 										+ "_"
 										+ secondAll.get(j).toString();
-								deltaList.remove(k);
+								
 
 								if (!deltaList.toString().contains(
 										originalString.replace(firstAll.get(i)
-												.toString(), edittedString)))
+												.toString(), edittedString)) && !originalString.contains(secondAll.get(j).toString()))
+								{
+									deltaList.remove(k);
 									deltaList.add(k, originalString.replace(
 											firstAll.get(i).toString(),
 											edittedString));
+								}
 								for (int p = 0; p < deltaEntList.size(); p++) {
 									if (deltaEntList.get(p).contains(
 											firstAll.get(i))) {
@@ -387,8 +380,9 @@ public class BTForNonIso {
 
 				}
 			}
+			System.out.println("Delta List Inside "+deltaList.toString());
 		}
-		System.out.println("Second All List "+secondGraph.toString());
+		System.out.println("Delta List Before Removal "+deltaList.toString());
 		for(int i=0;i<deltaList.size();i++)
 		{
 			for(int j=0;j<secondGraph.size();j++)
