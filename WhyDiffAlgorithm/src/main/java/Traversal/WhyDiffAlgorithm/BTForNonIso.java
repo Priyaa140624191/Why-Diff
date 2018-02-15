@@ -36,7 +36,7 @@ public class BTForNonIso {
 	static int inputCount = 0;
 
 	static String InvocationId1 = "140105";
-	static String InvocationId2 = "140104";
+	static String InvocationId2 = "140109";
 
 	static List<List<String>> divergingNodeLists = new ArrayList<List<String>>();
 	static List<String> divergingNodes = new ArrayList<String>();
@@ -104,6 +104,8 @@ public class BTForNonIso {
 
 	private static String original = "";
 
+	private static String edittedStringAct;
+
 	/*************** GRAPH VISUALISATION **************/
 
 	public static void main(String[] args) {
@@ -121,7 +123,7 @@ public class BTForNonIso {
 			 * 
 			 */
 			reSyncing();
-				
+
 			System.out.println("Listing Divergent nodes");
 			System.out
 					.println("|-------------------------------------------------------------------------------------------------------------------------------------------------|");
@@ -168,10 +170,12 @@ public class BTForNonIso {
 			p.makeGraph(firstGraph, firstEnt, firstAct, secondGraph, secondEnt,
 					secondAct);
 
-			if(first.size()<second.size())
-			 p.makeDelta(deltaList, deltaActList, deltaEntList, "Nodes_Inserted");
+			if (first.size() < second.size())
+				p.makeDelta(deltaList, deltaActList, deltaEntList,
+						"Nodes_Inserted");
 			else
-			 p.makeDelta(deltaList, deltaActList, deltaEntList, "Nodes_Deleted");
+				p.makeDelta(deltaList, deltaActList, deltaEntList,
+						"Nodes_Deleted");
 
 			Display d = new Display();
 			d.display();
@@ -200,21 +204,20 @@ public class BTForNonIso {
 		deltaList.remove(secondGraph.get(secondGraph.size() - 1));
 
 		deltaEntList.remove(firstEnt.get(firstEnt.size() - 1));
-		//deltaEntList.remove(secondEnt.get(secondEnt.size() - 1));
+		deltaEntList.remove(secondEnt.get(secondEnt.size() - 1));
 
 		if (first.size() < second.size()) {
-		swapTwoList(firstGraph, secondGraph);
-		swapTwoList(first, second);
-		//swapTwoList(firstAct,secondAct);
-		//swapTwoList(firstEnt,secondEnt);
-		}
-	/*	if (first.size() < second.size()) {
 			swapTwoList(firstGraph, secondGraph);
-			swapTwoList(first, second);*/
-			/*deltaList.add(secondAct.get(secondAct.size() - 1) + "->"
+			swapTwoList(first, second);
+			// swapTwoList(firstAct,secondAct);
+			// swapTwoList(firstEnt,secondEnt);
+		}
+		/*if (first.size() < second.size()) {
+
+			deltaList.add(secondAct.get(secondAct.size() - 1) + "->"
 					+ firstEnt.get(firstEnt.size() - 1) + "_"
-					+ secondEnt.get(secondEnt.size() - 1));*/
-		//} else {
+					+ secondEnt.get(secondEnt.size() - 1));
+		} else {*/
 			deltaList.add(firstAct.get(firstAct.size() - 1) + "->"
 					+ firstEnt.get(firstEnt.size() - 1) + "_"
 					+ secondEnt.get(secondEnt.size() - 1));
@@ -253,9 +256,9 @@ public class BTForNonIso {
 
 								String originalString = deltaList.get(k)
 										.toString();
-								String edittedString = firstAll.get(i)
+								edittedStringAct = firstAll.get(i)
 										.toString();
-								edittedString = firstAll.get(i).toString()
+								edittedStringAct = firstAll.get(i).toString()
 										+ "_" + secondAll.get(j).toString();
 
 								/*
@@ -263,31 +266,30 @@ public class BTForNonIso {
 								 * originalString.replace(firstAll.get(i)
 								 * .toString(), edittedString))
 								 */
-
+								deltaList.remove(k);
 								if (!originalString.contains(secondAll.get(j)
 										.toString())) {
-										deltaList.remove(k);
-										if (!deltaList.toString().contains(
-												originalString.replace(firstAll
-														.get(i).toString(),
-														edittedString))) {
+
+									if (!deltaList.toString().contains(
+											originalString.replace(firstAll
+													.get(i).toString(),
+													edittedStringAct))) {
 										deltaList.add(k, originalString
 												.replace(firstAll.get(i)
 														.toString(),
-														edittedString));
+														edittedStringAct));
 									}
 								}
 								if (!originalString.contains(firstAll.get(i)
 										.toString())) {
-										deltaList.remove(k);
-										if (!deltaList.toString().contains(
-												originalString.replace(secondAll
-														.get(j).toString(),
-														edittedString))) {
+									if (!deltaList.toString().contains(
+											originalString.replace(secondAll
+													.get(j).toString(),
+													edittedStringAct))) {
 										deltaList.add(k, originalString
 												.replace(secondAll.get(j)
 														.toString(),
-														edittedString));
+														edittedStringAct));
 									}
 								}
 								// }
@@ -297,7 +299,8 @@ public class BTForNonIso {
 											firstAll.get(i))) {
 										deltaActList.remove(p);
 										if (!deltaActList.toString().contains(
-												edittedString)) {
+												edittedStringAct)) {
+											
 											if (divergingNodeLists
 													.toString()
 													.contains(
@@ -311,12 +314,12 @@ public class BTForNonIso {
 																			.toString()))
 												deltaActList
 														.add(p,
-																edittedString
+																edittedStringAct
 																		+ "[shape=box][style=filled, fillcolor=mediumspringgreen, color=orangered]");
 											else
 												deltaActList
 														.add(p,
-																edittedString
+																edittedStringAct
 																		+ "[shape=box][style=filled,fillcolor = mediumspringgreen];");
 										}
 									}
@@ -359,29 +362,30 @@ public class BTForNonIso {
 										.toString()
 										+ "_"
 										+ secondAll.get(j).toString();
-
+								deltaList.remove(k);
 								if (!originalString.contains(secondAll.get(j)
 										.toString())) {
-									deltaList.remove(k);
+
 									if (!deltaList.toString().contains(
 											originalString.replace(firstAll
 													.get(i).toString(),
 													edittedString))) {
-									deltaList.add(k, originalString.replace(
-											firstAll.get(i).toString(),
-											edittedString));
+										deltaList.add(k, originalString
+												.replace(firstAll.get(i)
+														.toString(),
+														edittedString));
 									}
 								}
 								if (!originalString.contains(firstAll.get(i)
 										.toString())) {
-									deltaList.remove(k);
 									if (!deltaList.toString().contains(
 											originalString.replace(secondAll
 													.get(j).toString(),
 													edittedString))) {
-									deltaList.add(k, originalString.replace(
-											secondAll.get(j).toString(),
-											edittedString));
+										deltaList.add(k, originalString
+												.replace(secondAll.get(j)
+														.toString(),
+														edittedString));
 									}
 								}
 								for (int p = 0; p < deltaEntList.size(); p++) {
@@ -420,15 +424,14 @@ public class BTForNonIso {
 				}
 			}
 		}
-		
-		/*for(int i=0;i<deltaList.size();i++)
-		{
-			for(int j=0;j<secondGraph.size();j++)
-			{
-				if(secondGraph.get(j).toString().equals(deltaList.get(i).toString()))
-					deltaList.remove(i);
-			}
-		}*/
+
+		/*
+		 * for(int i=0;i<deltaList.size();i++) { for(int
+		 * j=0;j<secondGraph.size();j++) {
+		 * if(secondGraph.get(j).toString().equals(deltaList.get(i).toString()))
+		 * deltaList.remove(i); } }
+		 */
+
 		for (int i = 0; i < deltaActList.size(); i++) {
 			for (int j = 0; j < secondAct.size(); j++) {
 				if (secondAct.get(j).toString()
@@ -444,6 +447,13 @@ public class BTForNonIso {
 					deltaEntList.remove(i);
 			}
 		}
+		if (!deltaList.get(deltaList.size() - 1).contains(
+				edittedStringAct + "->"
+						+ firstEnt.get(firstEnt.size() - 1) + "_"
+						+ secondEnt.get(secondEnt.size() - 1)))
+			deltaList.add(edittedStringAct + "->"
+					+ firstEnt.get(firstEnt.size() - 1) + "_"
+					+ secondEnt.get(secondEnt.size() - 1));
 	}
 
 	private static void swapTwoList(List<String> firstGraph2,
@@ -1395,4 +1405,3 @@ public class BTForNonIso {
 	}
 
 }
-
