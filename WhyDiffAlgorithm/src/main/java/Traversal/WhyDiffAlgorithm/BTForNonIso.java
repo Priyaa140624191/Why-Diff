@@ -2,8 +2,10 @@ package Traversal.WhyDiffAlgorithm;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.neo4j.cypher.internal.compiler.v2_0.functions.Substring;
 import org.neo4j.cypher.javacompat.ExecutionEngine;
@@ -31,12 +33,12 @@ import Traversal.WhyDiffAlgorithm.NewMovie.RelationshipTypes;
 @SuppressWarnings({ "deprecation", "unused" })
 public class BTForNonIso {
 	static GraphDatabaseService graphDB = new GraphDatabaseFactory()
-			.newEmbeddedDatabase("A8");
+			.newEmbeddedDatabase("B26");
 
 	static int inputCount = 0;
 
-	static String InvocationId1 = "140105";
-	static String InvocationId2 = "140109";
+	static String InvocationId1 = "140102";
+	static String InvocationId2 = "140104";
 
 	static List<List<String>> divergingNodeLists = new ArrayList<List<String>>();
 	static List<String> divergingNodes = new ArrayList<String>();
@@ -105,6 +107,8 @@ public class BTForNonIso {
 	private static String original = "";
 
 	private static String edittedStringAct;
+
+	private static String edittedStringEnt;
 
 	/*************** GRAPH VISUALISATION **************/
 
@@ -177,7 +181,7 @@ public class BTForNonIso {
 				p.makeDelta(deltaList, deltaActList, deltaEntList,
 						"Nodes_Deleted");
 
-			Display d = new Display();
+			TryJS d = new TryJS();
 			d.display();
 
 		} catch (Exception ex) {
@@ -196,10 +200,23 @@ public class BTForNonIso {
 		deltaActList.addAll(firstAct);
 		deltaActList.addAll(secondAct);
 
+		/*for (int i = 0; i < deltaActList.size(); i++)
+		{
+			String original = deltaActList.get(i).toString();
+			String newString = deltaActList.get(i).toString() + "[shape=box][style=filled][fillcolor = mediumspringgreen]";
+			deltaActList.get(i).replace(original, original);
+		}*/
 		deltaEntList = new ArrayList<String>();
 		deltaEntList.addAll(firstEnt);
 		deltaEntList.addAll(secondEnt);
 
+		/*for (int i = 0; i < deltaEntList.size(); i++)
+		{
+			String original = deltaEntList.get(i).toString();
+			String newString = deltaEntList.get(i).toString() + "[style=filled][fillcolor = pink]";
+			deltaEntList.get(i).replace(original, original);
+		}*/
+		
 		deltaList.remove(firstGraph.get(firstGraph.size() - 1));
 		deltaList.remove(secondGraph.get(secondGraph.size() - 1));
 
@@ -212,26 +229,33 @@ public class BTForNonIso {
 			// swapTwoList(firstAct,secondAct);
 			// swapTwoList(firstEnt,secondEnt);
 		}
-		/*if (first.size() < second.size()) {
+		/*
+		 * if (first.size() < second.size()) {
+		 * 
+		 * deltaList.add(secondAct.get(secondAct.size() - 1) + "->" +
+		 * firstEnt.get(firstEnt.size() - 1) + "_" +
+		 * secondEnt.get(secondEnt.size() - 1)); } else {
+		 */
+		deltaList.add(firstAct.get(firstAct.size() - 1) + "->"
+				+ firstEnt.get(firstEnt.size() - 1) + "\u2261"
+				+ secondEnt.get(secondEnt.size() - 1));
 
-			deltaList.add(secondAct.get(secondAct.size() - 1) + "->"
-					+ firstEnt.get(firstEnt.size() - 1) + "_"
-					+ secondEnt.get(secondEnt.size() - 1));
-		} else {*/
-			deltaList.add(firstAct.get(firstAct.size() - 1) + "->"
-					+ firstEnt.get(firstEnt.size() - 1) + "_"
-					+ secondEnt.get(secondEnt.size() - 1));
-		//}
+		deltaList.add(secondAct.get(secondAct.size() - 1) + "->"
+				+ firstEnt.get(firstEnt.size() - 1) + "\u2261"
+				+ secondEnt.get(secondEnt.size() - 1));
+		// }
 
 		if (divergingNodeLists.toString().contains(
 				first.get(first.size() - 1).toString())
 				&& divergingNodeLists.toString().contains(
 						second.get(second.size() - 1).toString()))
-			deltaEntList.add(firstEnt.get(firstEnt.size() - 1) + "_"
-					+ secondEnt.get(secondEnt.size() - 1)
-					+ "[style=filled, fillcolor = pink, color=orangered]");
+			deltaEntList
+					.add(firstEnt.get(firstEnt.size() - 1)
+							+ "\u2261"
+							+ secondEnt.get(secondEnt.size() - 1)
+							+ "[peripheries=2, style=filled, fillcolor = pink, color=orangered]");
 		else
-			deltaEntList.add(firstEnt.get(firstEnt.size() - 1) + "_"
+			deltaEntList.add(firstEnt.get(firstEnt.size() - 1) + "\u2261"
 					+ secondEnt.get(secondEnt.size() - 1)
 					+ "[style=filled, fillcolor = pink");
 
@@ -256,10 +280,10 @@ public class BTForNonIso {
 
 								String originalString = deltaList.get(k)
 										.toString();
-								edittedStringAct = firstAll.get(i)
-										.toString();
+								edittedStringAct = firstAll.get(i).toString();
 								edittedStringAct = firstAll.get(i).toString()
-										+ "_" + secondAll.get(j).toString();
+										+ "\u2261"
+										+ secondAll.get(j).toString();
 
 								/*
 								 * if (!deltaList.toString().contains(
@@ -269,11 +293,11 @@ public class BTForNonIso {
 								deltaList.remove(k);
 								if (!originalString.contains(secondAll.get(j)
 										.toString())) {
-
 									if (!deltaList.toString().contains(
 											originalString.replace(firstAll
 													.get(i).toString(),
 													edittedStringAct))) {
+										// deltaList.remove(k);
 										deltaList.add(k, originalString
 												.replace(firstAll.get(i)
 														.toString(),
@@ -282,10 +306,17 @@ public class BTForNonIso {
 								}
 								if (!originalString.contains(firstAll.get(i)
 										.toString())) {
-									if (!deltaList.toString().contains(
+									System.out.println("Original "
+											+ originalString);
+									if (!deltaList.toString().equals(
 											originalString.replace(secondAll
 													.get(j).toString(),
 													edittedStringAct))) {
+										System.out.println("Replaced: "
+												+ originalString.replace(
+														secondAll.get(j)
+																.toString(),
+														edittedStringAct));
 										deltaList.add(k, originalString
 												.replace(secondAll.get(j)
 														.toString(),
@@ -300,7 +331,7 @@ public class BTForNonIso {
 										deltaActList.remove(p);
 										if (!deltaActList.toString().contains(
 												edittedStringAct)) {
-											
+
 											if (divergingNodeLists
 													.toString()
 													.contains(
@@ -315,7 +346,7 @@ public class BTForNonIso {
 												deltaActList
 														.add(p,
 																edittedStringAct
-																		+ "[shape=box][style=filled, fillcolor=mediumspringgreen, color=orangered]");
+																		+ "[shape=box][peripheries=2,style=filled, fillcolor=mediumspringgreen, color=orangered]");
 											else
 												deltaActList
 														.add(p,
@@ -328,6 +359,7 @@ public class BTForNonIso {
 							}
 						}
 					} else {
+
 						for (int k = 0; k < deltaList.size(); k++) {
 							if (deltaList.get(k).contains(firstAll.get(i))
 									|| deltaList.get(k).contains(
@@ -358,9 +390,9 @@ public class BTForNonIso {
 											secondAll.get(j))) {
 								String originalString = deltaList.get(k)
 										.toString();
-								String edittedString = firstAll.get(i)
+								String edittedStringEnt = firstAll.get(i)
 										.toString()
-										+ "_"
+										+ "\u2261"
 										+ secondAll.get(j).toString();
 								deltaList.remove(k);
 								if (!originalString.contains(secondAll.get(j)
@@ -369,11 +401,11 @@ public class BTForNonIso {
 									if (!deltaList.toString().contains(
 											originalString.replace(firstAll
 													.get(i).toString(),
-													edittedString))) {
+													edittedStringEnt))) {
 										deltaList.add(k, originalString
 												.replace(firstAll.get(i)
 														.toString(),
-														edittedString));
+														edittedStringEnt));
 									}
 								}
 								if (!originalString.contains(firstAll.get(i)
@@ -381,11 +413,11 @@ public class BTForNonIso {
 									if (!deltaList.toString().contains(
 											originalString.replace(secondAll
 													.get(j).toString(),
-													edittedString))) {
+													edittedStringEnt))) {
 										deltaList.add(k, originalString
 												.replace(secondAll.get(j)
 														.toString(),
-														edittedString));
+														edittedStringEnt));
 									}
 								}
 								for (int p = 0; p < deltaEntList.size(); p++) {
@@ -393,7 +425,7 @@ public class BTForNonIso {
 											firstAll.get(i))) {
 										deltaEntList.remove(p);
 										if (!deltaEntList.toString().contains(
-												edittedString)) {
+												edittedStringEnt)) {
 											if (divergingNodeLists
 													.toString()
 													.contains(
@@ -407,12 +439,12 @@ public class BTForNonIso {
 																			.toString()))
 												deltaEntList
 														.add(p,
-																edittedString
-																		+ "[style=filled, fillcolor = pink, color=orangered]");
+																edittedStringEnt
+																		+ "[peripheries=2, style=filled, fillcolor = pink, color=orangered]");
 											else
 												deltaEntList
 														.add(p,
-																edittedString
+																edittedStringEnt
 																		+ "[style=filled,fillcolor = pink];");
 										}
 									}
@@ -421,16 +453,33 @@ public class BTForNonIso {
 						}
 					}
 
+					else {
+
+						for (int k = 0; k < deltaList.size(); k++) {
+							if (deltaList.get(k).contains(firstAll.get(i))
+									|| deltaList.get(k).contains(
+											secondAll.get(j))) {
+
+								String originalString = deltaList.get(k)
+										.toString();
+
+								String edittedString = firstAll.get(i)
+										.toString();
+
+								deltaList.remove(k);
+
+								if (!deltaList.toString().contains(
+										originalString.replace(firstAll.get(i)
+												.toString(), edittedString)))
+									deltaList.add(k, originalString.replace(
+											firstAll.get(i).toString(),
+											edittedString));
+							}
+						}
+					}
 				}
 			}
 		}
-
-		/*
-		 * for(int i=0;i<deltaList.size();i++) { for(int
-		 * j=0;j<secondGraph.size();j++) {
-		 * if(secondGraph.get(j).toString().equals(deltaList.get(i).toString()))
-		 * deltaList.remove(i); } }
-		 */
 
 		for (int i = 0; i < deltaActList.size(); i++) {
 			for (int j = 0; j < secondAct.size(); j++) {
@@ -448,12 +497,16 @@ public class BTForNonIso {
 			}
 		}
 		if (!deltaList.get(deltaList.size() - 1).contains(
-				edittedStringAct + "->"
-						+ firstEnt.get(firstEnt.size() - 1) + "_"
-						+ secondEnt.get(secondEnt.size() - 1)))
+				edittedStringAct + "->" + firstEnt.get(firstEnt.size() - 1)
+						+ "\u2261" + secondEnt.get(secondEnt.size() - 1)))
 			deltaList.add(edittedStringAct + "->"
-					+ firstEnt.get(firstEnt.size() - 1) + "_"
+					+ firstEnt.get(firstEnt.size() - 1) + "\u2261"
 					+ secondEnt.get(secondEnt.size() - 1));
+
+		Set<String> hs = new HashSet<>();
+		hs.addAll(deltaList);
+		deltaList.clear();
+		deltaList.addAll(hs);
 	}
 
 	private static void swapTwoList(List<String> firstGraph2,
@@ -500,32 +553,40 @@ public class BTForNonIso {
 					}
 				}
 
-				/*
-				 * if(!firstExtra.get(i).toString().contains("invocation") &&
-				 * !secondExtra.get(j).toString().contains("invocation") &&
-				 * IsZipped(firstExtra.get(i).toString(),
-				 * secondExtra.get(j).toString())) {
-				 * System.out.println("Entities Zipped"); Node entNode1 =
-				 * graphDB.findNode(NodeType1.entity, "id",
-				 * firstExtra.get(i).toString()); Node entNode2 =
-				 * graphDB.findNode(NodeType1.entity, "id",
-				 * secondExtra.get(j).toString()); for (int k = 0; k <
-				 * divergingNodeLists.size(); k++) { if
-				 * (divergingNodeLists.get(k
-				 * ).toString().contains(firstExtra.get(i).toString())) {
-				 * divergingNodeLists.remove(divergingNodeLists.get(k)); } if
-				 * (divergingNodeLists
-				 * .get(k).toString().contains(secondExtra.get(j).toString())) {
-				 * divergingNodeLists.remove(divergingNodeLists.get(k)); } }
-				 * if(checkFurtherEntityEqual
-				 * (entNode1.getProperty("attributes").
-				 * toString(),entNode2.getProperty("attributes").toString())) {
-				 * System.out.println("Entities Matched"); } else{
-				 * divergingNodes = new ArrayList<String>();
-				 * divergingNodes.add(firstExtra.get(i).toString());
-				 * divergingNodes.add(secondExtra.get(j).toString());
-				 * divergingNodeLists.add(divergingNodes); } }
-				 */
+				if (!firstExtra.get(i).toString().contains("invocation")
+						&& !secondExtra.get(j).toString()
+								.contains("invocation")
+						&& IsZipped(firstExtra.get(i).toString(), secondExtra
+								.get(j).toString())) {
+					System.out.println("Entities Zipped");
+					Node entNode1 = graphDB.findNode(NodeType1.entity, "id",
+							firstExtra.get(i).toString());
+					Node entNode2 = graphDB.findNode(NodeType1.entity, "id",
+							secondExtra.get(j).toString());
+					for (int k = 0; k < divergingNodeLists.size(); k++) {
+						if (divergingNodeLists.get(k).toString()
+								.contains(firstExtra.get(i).toString())) {
+							divergingNodeLists
+									.remove(divergingNodeLists.get(k));
+						}
+						if (divergingNodeLists.get(k).toString()
+								.contains(secondExtra.get(j).toString())) {
+							divergingNodeLists
+									.remove(divergingNodeLists.get(k));
+						}
+					}
+					if (checkFurtherEntityEqual(
+							entNode1.getProperty("attributes").toString(),
+							entNode2.getProperty("attributes").toString())) {
+						System.out.println("Entities Matched");
+					} else {
+						divergingNodes = new ArrayList<String>();
+						divergingNodes.add(firstExtra.get(i).toString());
+						divergingNodes.add(secondExtra.get(j).toString());
+						divergingNodeLists.add(divergingNodes);
+					}
+				}
+
 			}
 		}
 
