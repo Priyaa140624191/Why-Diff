@@ -1,0 +1,302 @@
+\documentclass[6pt,,a4paper]{article}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage[justification=centering]{caption}
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+\usepackage{lipsum}
+\usepackage{etoolbox}
+\usepackage[colorlinks=true,
+            linkcolor=red,
+            urlcolor=blue,
+            citecolor=gray]{hyperref}
+\title{\LARGE{Investigating Models and Techniques for Computational Reproducibility}}
+\author{Priyaa Thavasimani}
+%\date{June 2016} %Insert leading % sign for today's date.
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{makeidx}
+\usepackage{mdframed}
+\makeindex
+\begin{document}
+%\doublespacing
+\Large
+\maketitle
+\begin{abstract}\large\noindent
+Scientific research progresses when discoveries are reproduced and verified. This research emphasises the reproducibility of computational experiments rather than a simple repeatability or replicability. Execution of reliable Reproducible research requires more than just good tools. Most computations that are reproduced do not guarantee the correctness of results because of the underlying fact that they use different artifacts. I intend to address some of the challenges in making computations reproducible, specifically by exploring the role of metadata in ensuring reproducibility, and investigating models and techniques for explaining changes between outcomes of related computational experiments over time.
+\end{abstract}
+\section{\textbf{Introduction}}
+Computations are redone because of two primary reasons. The first is to validate the results and the second reason is to enable reuse of the results by other researchers, who may then be able to extend or modify the experimental method. The term 'reproducibility'\, is often used in research of redoing scientific experiments. Researchers give a semantic distinction between replicability and reproducibility. Replicability is redoing experiment in exactly the same way, while reproducibility focuses on the result being verified rather than on the specific method used to achieve the result. The motivation of reproduction is on concepts rather than artifacts - to recreate the essence of the experiment rather than the experiment itself. Mere redoing of existing computations has no claim for generalisability. As cited above, the reproducibility is more ambitious term as it promotes meta studies, where the ideas of multiple independent studies are combined and produce better results. Though there are existing technologies that makes Reproducible Research possible, improper use of computational tools and software can lead to spectacularly incorrect results. Guaranteeing reproducibility requires a system that is rigorous in keeping track of research activities. Tool should compare past and present provenance traces and also should answer following questions.
+\begin{itemize} \label{data}
+       \item Which code was run? When it was run?
+        \item Which dependencies were used?
+          \item What were the inputs and outputs?
+	 \item Where did it run?
+	 \item Who executed the computation?
+ 	 \item Which process was it part of?
+       	 \item Were both computations produced same result? If not, why not?
+\end{itemize}
+The above questions are high-level and could be answered with further investigation. The main aim of the research is to investigate what kind of metadata should be collected, and how it can be exploited, in order to help users understand why results obtained from similar computations differ. 
+\section{\textbf{BACKGROUND AND RELATED WORK}}
+This section discusses the following:
+\begin{itemize} \label{data}
+       \item Difference among repeatability, replicability and reproducibility.
+        \item Levels of Reproducibility.
+          \item Tools that aids Reproducibility.
+	 \item Provenance Tracking.
+	 \item Comparison of Workflow provenance.
+\end{itemize}
+Redoing computations often provoke a question whether it aims at repeatability, replicability or reproducibility. Reproduction and Replication of reported scientific results is a widely discussed topic within the scientific community \textsuperscript{[1]-[8]}. The author\textsuperscript{[5]} defines the repeatability as the ability to re-run the exact same or similar system and obtain the same or very similar result. This work also emphasizes the importance of reproducibility saying it uncovers the mistakes (or fraud) more readily than replication which provides a baseline and facilitates extending and building on previous work. A classification was given by C. Drummond\textsuperscript{[7]} saying “replicability” to denote situations where the previous experiment is redone in exactly the same way, whereas in “reproducibility” the focus is on the result being verified and not on the method to achieve this result. The motivation of reproduction is on concepts rather than artifacts - we try to recreate the essence of the experiment rather than the experiment itself \textsuperscript{[8]}. In this project, we address the reproducibility of computations, as we don’t aim to achieve exact incarnation of the existing computation, but rather varying, augmenting and remodeling the existing methods and also by applying ‘parameter sweeps’. The TABLE I  indicates the terms used in researches which redo computations.
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|P{2.5cm}|P{5.15cm}|}          
+   \hline
+    \textbf{Term}  &  \textbf{Definition}    \\
+  \hline
+  Repetition   &  \begin{tabular}{l l l} Run exactly what someone \\  else has done  using\\ their original artifacts. \end{tabular} \\
+   \hline
+  Replication  &   \begin{tabular}{l l l}Precisely replicate exactly  \\   what someone else has done, \\   recreating their artifacts. \end{tabular}\\
+ \hline
+  Reproduction & \begin{tabular}{l l l}Recreate the spirit of what   \\    someone else has done,   \\ using your own artifacts. \end{tabular}\\
+ \hline
+\end{tabular}
+\end{center}
+\caption{Reproducible Research Terminology}
+\end{table}
+\break Reproducibility of computations is a challenging task because of the underlying fact that it involves change at multiple levels, some of which are not within the control of the experimenter\textsuperscript{[7]}.  Long-term reproducibility is hard to achieve due to the factors that include the use of specialized hardware, proprietary data and inevitable changes in the hardware and software environments. Freire et al. \textsuperscript{[9]} have introduced three criteria to characterize the level of reproducibility of computations. The three criteria include ‘Depth’ which evinces how much of an experiment is made available, ‘Portability’ indicates whether the experiment can be reproduced on the original environment, similar or on a different environment, ‘Coverage’ that specifies how much of the experiment can be reproduced. The Coverage can either be full or partial.
+In general, computations are viewed as a black box which takes input data and produce output data. In order to reproduce the computational experiments, lot more details are needed to be considered other than just the input and output. Workflows are widely used to represent and execute computational experiments.  Capturing and exploiting provenance information is considered to be important in case of computational reproducibility \textsuperscript{[10-13]}. 
+Tools such as Git, CVS and SVS help in recording and tracking of program files that changes over time. Tools that record provenance of computations include E-Science Central \textsuperscript{[14]}, Reprozip \textsuperscript{[15]}, Pegasus \textsuperscript{[16]}, Galaxy, VisTrails, Kepler, Taverna, Madagascar, etc \textsuperscript{[17]}. Workflow Management System like Taverna \textsuperscript{[18]} and Kepler \textsuperscript{[19]} facilitates the user to design workflows using graphical editor.  
+After capturing the provenance traces from the available tools, automating the computation is another milestone. Available virtualisation technology such as Virtual Machines containers like Docker are able to persistently capture a computational environment \textsuperscript{[17]}, so that they can be deployed in the cloud. Projects like RunMyCode.org and recomputation.org exploit this kind of technology, facilitating construction and availability of computational environments in the cloud. TOSCA is a standard by OASIS that aids in automatic deployment \textsuperscript{[20]} by providing a technology-independent, abstract and extensible model to describe workflows.
+The studies that are listed above facilitates replicability which forms the basis of reproducibility. Reproducibility implies at-least some changes have been introduced in the experiment, thus exposing different features. The result of comparison of two provenance traces can give surprising or unexpected results even though we have reproduced the same experiment with minor changes and further gives rise to question - 'How this data was generated?'\, Reasoning about the sequence of steps that led to a particular result is the real goal of reproducing another\textsuperscript{'}s work, and tools to manipulate the provenance of results are key enabler \textsuperscript{[21]}. Those changes are tracked by Researchers in different ways. The comparison by existing tool ‘Vistrail’ provenance detects file’s contents by hashes, allowing users to later check that provided data does indeed match that used in the original experiment \textsuperscript{[22]}. The ‘VisTrail’ team has also included persistence package feature that allows users to store input, output and intermediate data in a versioned history.  An issue with the ‘VisTrail’ is the impact on reproducibility based on the updated database. To address this issue, a model was developed that integrated workflow and database provenance and enables reproducibility for workflows that interacts with relational databases \textsuperscript{[23]}. Similar to database provenance, the researcher \textsuperscript{[24]} tracked the dependencies of external web service and developed a ‘Web Service Monitoring Framework’. ‘VFramework’ is a framework created to verify that a redeployed process performs according to expectations. This framework which was evaluated using ‘Taverna’, uses an ontology-based model \textsuperscript{[25]} for description of processes and their dependencies. This framework was evaluated to check the verification and validation capabilities by re-executing the use cases in Linux and Windows based environments \textsuperscript{[26]}.
+Further to monitoring tool that aid tracking changes in the external dependencies, it has become essential to analyse and monitor data transformations. Provenance tracking is generally classified into two types - Backward and Forward. Backward tracking is finding the input subsets that contributed to a given output element whereas Forward Provenance is determining which output elements were derived from a particular input element. 
+Researchers classify Provenance captured by the system into two basic types \textsuperscript{[27]} - Prospective and Retrospective. Prospective provenance captures the abstract specification of the computational tasks like workflow procedure calls and data dependencies whereas retrospective provenance captures more detailed information like execution environment, recordings of where and when each procedure was run and how it executed. In addition \textsuperscript{[28]}, the author classified the Provenance for single transformations as Map, Reduce, Union and Split Provenance. 
+Researchers have also investigated the provenance tracking in Relational, Graph and RDF databases. In the paper \textsuperscript{[29]}, the author addresses the problem of unexpected answers for pattern matching queries in graph databases implementing a property graph model. The Why-Not algorithm \textsuperscript{[30]} is designed to compute query-based on workflows and also applied to relational queries when considering relational operators as the individual manipulations of the workflow. Another algorithm NedExplain, computes the why-not provenance for monotone relational queries with aggregation. The comparison study made in the work \textsuperscript{[31]} tells NedExplain is faster than Why-Not algorithm and provides high-quality Why-Not answers in reasonable time. The authors \textsuperscript{[32]} evaluated three representations for storing the data - relational, RDF and Graph and their results indicate that the RDF representation achieves best query performance, but only the graph representation has the functionality necessary for some queries. 
+Workflow Management Systems not only capture the provenance, but also capture the workflow evolution and offers all the data for users to analyze it. Despite of rich provenance captured by Workflow Management Systems, a vast number of computational workflows are being developed using general purpose scripting languages such as Python, R, and Matlab. ‘YesWorkflow’ and ‘noWorkflow’ are the tools that captures the provenance of independent scripts. ‘YesWorkflow’\,\textsuperscript{[33]} extracts the latent information from scripts, exports, visualize in graph form. Given a script, YesWorkflow generates the workflow based on user annotations which generally captures prospective provenance.
+‘noWorkflow’ \textsuperscript{[34]} (not only Workflow) system uses Python runtime profiling functions to generate provenance traces that reflect the processing history of the script. ‘noWorkflow’ captures three types of provenance - definition, deployment, and execution provenance. 
+Another provenance tracking system is ‘Sumatra’ \textsuperscript{[35]}  which captures each execution in configuration management tool, allows users to tag and compares the collected provenance traces. 
+W3C PROV \textsuperscript{[36]} defines a data model and a set of constraints. It represents provenance as a Directed Acyclic Graph. Vertices in the PROV model represents entities, activities or agents.  As scientists use different Workflow Management Systems, the provenance generated by such systems are in different format. To address this problem, an integration model ‘ProvONE’ \textsuperscript{[37]} which takes in the provenance traces of heterogeneous workflow systems and generated integrated provenance database as Prolog facts. To have a common understanding of capabilities of different provenance systems, a data model was crafted by the authors and released as PROV-DM\textsuperscript{[38]}. 
+PROV-DM is conceptual data model that has following types and relationships. nodes are identified by prov:Activity, proc:Entity, prov:Agent, and relationship types are identified by prov:used, prov:wasInformedBy, prov:wasAssociatedWith, prov:wasGeneratedBy, prov:wasAttributedTo, prov:wasDerivedFrom, prov:actedOnBehalfOf.
+\begin{figure}[h]
+\begin{center}
+            \includegraphics[scale=0.75]{PROV.png}
+\end{center}
+\centering
+\caption{ PROV Core Structures}\index{ PROV Core Structures }
+\end{figure}
+\newline
+ 'Entity'\, refers to Physical,  digital, conceptual, or other kind of thing with some fixed aspects; entities may be real or imaginary.  An 'Activity'\, is something that occurs over a period of time and acts upon or with entities. An 'Agent'\, is something that bears some form of responsibility for an activity taking place, for the existence of an entity, or for another agent\textsuperscript{'}s activity. 'wasGeneratedBy'\, refers to relationship between entity and activity, saying the entity was generated by the activity. The relationship 'used'\, infers that an entity is used by the activity and 'wasDerivedFrom'\, refers to an entity being derived from another entity. As name indicates,'wasAssociatedWith'\, refers to an activity being associated to an Agent. 'wasInformedBy'\, infers an activity being informed by another activity about an entity. 'actedOnBehalfOf'\, refers to an agent acting on behalf of another agent. 'wasAttributedTo'\, refers to an entity being attributed to an agent.
+\section{\textbf{PROBLEM AND JUSTIFICATION}}
+In broader perspective, the dependencies of computational experiments include elements at all levels of the architectural stack, namely: Hardware configuration, OS version and configuration, Software libraries, external services and external data sources (which are often accessed through web-based services).
+Some of these dependencies are easily satisfied by simple virtualisation of the computing environment. For instance, in the example stated above, Hardware and OS requirements can be met just by allocating a VM with the correct OS version, on a cloud infrastructure that can satisfy the HW requirements. Software dependencies, on the other hand, may be more challenging. Reproducing this scenario requires tracking the changes in some of these dependencies over time. While techniques exist to address this problem, such as models and technology for virtualisation, a number of challenges remain. 
+\begin{figure}[h]
+\begin{center}
+            \includegraphics[scale=0.75]{archi.png}
+\end{center}
+\caption{Architecture stack with dependencies at multiple levels}\index{Architecture stack with dependencies at multiple levels }
+\end{figure}
+\newline Having complete knowledge of 
+\begin{enumerate} \label{data}
+       \item Script structure
+        \item Changes to structure between Trial 1 and Trial 2, where a Trial refers execution of the experiment. 
+          \item Provenance from each trial.
+\end{enumerate}
+Following questions needs \break to be answered:
+\begin{description} \label{data}
+   \item [Q1] Can the “why-diff” questions be answered with the availability of 1, 2 and 3?
+   \item [Q2] What should 1,2 and 3 above contain in order to answer “why-diff”? Is it a prospective or retrospective provenance?
+   \item [Q3] Do existing tools provide a complete solution? can it be generalised to arbitrary code with ProvONE structure, version changes and traces?
+   \item  [Q4] Is the existing algorithm platform independent and language neutral?
+   \item [Q5] How can we perform the systematic comparison of workflow re-executions?
+\end{description}
+Rather than just replicating a computation, it is about changing input or any other dependencies (without breaking the setup execution environment) and assessing the effect on the outcome. This allows the other researchers to mix and match their own methods with the existing system to achieve better results. Extending the idea of reproducibility is the conceptual replication, in which the essential conclusions of a study are examined, intentionally using different methods than in the original study. 
+The rich provenance information captured by Workflow Management Systems are used by reproducible researchers for two benefits:
+\begin{enumerate} \label{data}
+       \item Replicating the computation.
+	\item Verifying the reproduced with the original computations.
+\end{enumerate}
+We intend to use provenance details for comparing the results of reproduced computations with original. This allows the researchers to go back to previous work and possibly extend it. 
+Many configuration management tools, such as Git, track the evolution of software through versioning \textsuperscript{[39]}. Though generic and fast, these tools capture only prospective provenance at coarse grain, when used to version experiment scripts. The comparison tool used in Vistrail and Taverna as mentioned in the Background and Related Work, detects the change in relational databases and external web services respectively, but they are not monitoring the changes in a workflow as a whole. Simple comparison of the files hashes is not sufficient as provenance traces can differ in multiple ways. For instance, the files have execution timestamps, the same data can be organized in different order, or can contain different data formats which require distinctive comparison methods to confirm their uniqueness. In addition, the environment in which the workflow is reproduced may be completely different, since researchers use their own infrastructure and systems in which they run workflows. 
+The VMFramework is made outside of the workflow engine and hence fails to capture more fine grained information. Further to this, investigation need to be done in limiting the amount of dependencies without limiting the workflow processing capabilities. For each application, researchers might be interested in particular subset of provenance. For instance, a simple pattern matching approach might be sufficient for certain applications whereas sophisticated machine learning mechanisms might be necessary for other applications. 
+There are several approaches\textsuperscript{[39]} for comparing provenance traces related to scientific workflows, they cannot be applied directly to scientific workflow domain as they are either too generic or too specific. For example, noWorkflow captures fine grained reterospective provenance. The amount of information captured by the noWorkflow is extremely large which may succeed in analyzing small scripts but fail to give clear explanations for ‘why-diff’ questions for complex scripts.  Though ‘Sumatra’ \textsuperscript{[40]} compares provenance traces of workflows, it does not record intermediate state of files during execution and also fails to store the evolution of experiments. Most of these approaches capture retrospective provenance with intermediate data, and support querying and visualizing provenance during analysis. However, they do not provide mechanisms to compare and contrast two different executions. In order to address this gap, there is need for an algorithm that enable automatic comparison of provenance traces by the reproduced workflows with its original traces and facilitates the researches to roll back to reliable state without redoing the computation as a whole.
+\section{\textbf{Aim}}
+To address some of the challenges in making computations reproducible, specifically by exploring the role of metadata in ensuring reproducibility, and investigating models and techniques for explaining changes between outcomes of related computational experiments over time.
+\section{\textbf{Objectives}}
+\begin{enumerate}  \label{data}
+ \item To understand the role of data provenance to support computational reproducibility.
+\item To develop system infrastructure and tools for future-proofing computational processes, i.e., by collecting metadata associated with execution to ensure its reproducibility at a later time.
+\item To develop techniques and tools for analysing the metadata in order to understand changes in experimental results.
+\end{enumerate}
+\setlength{\textfloatsep}{5pt}
+\section{\textbf{Work done so far}}
+\begin{enumerate} \label{data}
+       \item Literature Review.
+        \item Extending the ProvToolBox to support eScience Central provenance with export to Neo4J (in progress).
+            \item Initial experiments with yesWorkflow, noWorkflow and workflow provenance traces, in collaboration with interns from the DataONE project  \href{https://docs.google.com/document/d/10mkbtjlx3jO_G1DjGfqbUJOdldOATgvR-3VCDSmYr04/edit}{(Reference)}. 
+\end{enumerate}
+\section{\textbf{Experimental Results}}
+\subsection{\textbf{ YesWorkflow and NoWorkflow}}
+\vspace{-10mm}
+\begin{figure}[h]
+\begin{center}
+            \includegraphics[scale=0.40]{Workflow.png}
+\end{center}
+\centering
+\caption{ Provenance Graph}\index{Provenance Graph}
+\end{figure}
+\break
+To experiment with YesWorkflow and noWorkflow, a sample usecase was developed in Python. The script is used to access tweets from Twitter with the search term specified and analyse the sentiments of each tweet and shows the sentiments in pie chart. \href{https://docs.google.com/document/d/1H9p04oypDPEiuzP6qKz8Pvn0xDusqKXYqDvS_PeXB6o/edit}{(Code)}.
+\vspace{-4mm}
+\subsection{\textbf{PROV-DM - Neo4j Graph Representation}}
+To have a common understanding of capabilities of different provenance systems, we take the advantage of PROV-DM model. The following sample PROVN file is used to represent provenance information in Neo4j Graph (Figure 4).
+\\
+\\
+\fbox{\begin{minipage}{15em}
+\textbf{\small {document} \newline
+  prefix ex  <http://example.org/> \newline
+  entity(ex:papers) \newline
+  activity(ex:writing) \newline
+  entity(ex:article) \newline
+  agent(ex:William) \newline
+  agent(ex:Paolo) \newline
+  entity(ex:dissertation) \newline
+  used(ex:writing, ex:dissertation, 2012-09-15T16:00:00) \newline
+  wasGeneratedBy(ex:papers, ex:writing, 2012-09-21T20:00:00) \newline
+  wasAssociatedWith(ex:writing, ex:William, -, [ prov:Role="author" ]) \newline
+  actedOnBehalfOf(ex:William, ex:Paolo) \newline
+  wasAttributedTo(ex:papers, ex:William) \newline
+  wasAttributedTo(ex:article, ex:William) \newline
+endDocument}
+\end{minipage}}
+\\
+\newline
+\newline
+The Fig 4 represents the Neo4j representation of nodes and relationships that is extracted from the sample PROVN file. ProvToolBox converts PROVN to XML, which in turn converted to Graph . In the graph, the nodes are identified by circles and relationship types are represented by arrows. 
+\\ 
+\begin{figure}[h]
+\begin{center}
+            \includegraphics[scale=0.90]{NEO.png}
+\end{center}
+\centering
+\caption{Neo4j Graph for the Sample PROVN file}\index{Neo4j Graph for the Sample PROVN file}
+\end{figure} 
+\subsection{\textbf{Future Work}}
+Further, I intend to take the provenance traces from e-Science Central WFMS and depict that to Graph Database model. Motivated by the rich provenance of the e-Science Central workflow system,  I aim to develop an algorithm that compares the workflows with in e-Science Central and to develop a user oriented tool which answers “why-diff” queries.
+\newline
+\section{\textbf{TIMETABLE}}
+The project can perform its objective by executing the following scheduling time:
+\\
+\break \textbf{September, 2015 - March, 2016: }
+Attending interdisciplinary training and Coursework. Experiment with the eScience Central Workflow Management System and specifically with its provenance generation capability, and contrast its capabilities with those of others, for instance Pegasus and Taverna. Instrument eScience Central with additional metadata collection capabilities. 
+\\
+\break \textbf{April, 2016 to June 2016: }
+Developing sample usecase ‘Twitter Sentiment Analysis’ using python. Experimented the usecase with ‘YesWorkflow’ and ‘NoWorkflow’, capturing reterospective and prospective provenance. Demonstrate the work to supervisory team in presentation.
+\\
+\break \textbf{July, 2016 to August, 2016: }
+Aim to submit a survey paper on reproducibility to a highly ranked journal. Finalising project plan, submitting, and presenting annual report. 
+\\
+\break \textbf{September, 2016 to March, 2017: }
+Begin working on algorithm and tool to analyse the divergence between results obtained using different versions of a process (with evolving dependencies). 
+\\
+\break \textbf{April, 2017 to August, 2017: }
+Continued research and development work on the role of metadata (ie provenance) in facilitating reproducibility. Connecting metadata management with virtualisation techniques for reproducibility. Present findings to supervisory group in presentation.
+\\
+\break \textbf{September, 2017 to October, 2018: }
+Initial evaluation of the research using the ReComp project as a testbed. Publication of initial results in top quartile conferences and journals. Extended evaluation with respect to a more comprehensive set of case studies, continued publication. 
+\\
+\break \textbf{November, 2018 to September, 2019: }
+Writing up thesis.
+\begin{thebibliography}{12}
+\bibitem{Schwab}  M. Schwab, N. Karrenbach, and J. Claerbout. "Making scientific com-putations  reproducible". Computing  in  Science  and  Engineering. vol  2, no 6. pp 61–67. 2000. 
+\bibitem{Barnes} N. Barnes, “Publish your computer code: it is good enough,” Nature , vol. 467, no. 753, 2010. 
+\bibitem{Mesirov} J. P. Mesirov, “Accessible Reproducible Research,”Science , vol. 327, no. 5964, pp. 415–416, 2010.
+\bibitem{Morin} A. Morin, J. Urban, P. D. Adams, I. Foster, A. Sali, D. Baker, and P. Sliz, “Shining Light into Black Boxes,”Science , vol. 336, no. 6078, pp. 159–160, 2012. 
+\bibitem{Joppa} L. N. Joppa, G. McInerny, R. Harper, L. Salido, K. Takeda, K. O’Hara, D. Gavaghan, and S. Emmott, “Troubling Trends in Scientific Software Use,”Science , vol. 340, no. 6134, pp. 814–815, 2013.
+\bibitem{Jan} Jan Vitek, Tomas Kalibera, “Repeatability, Reproducibility and Rigor in Systems Research”, EMSOFT’11, October 9 -14, 2011.
+\bibitem{Drummond} C. Drummond, “Replicability is not reproducibility: Nor is it good science”, 4th Workshop Evaluation Methods for Machine Learning, Jun 2009.
+\bibitem{Feitelson} D. G. Feitelson, “From Repeatability to Reproducibility and Corroboration,” ACM SIGOPS Operating Systems Review, vol. 49, no. 1, pp. 3–1, 2015, Special Issue on Repeatability and Sharing of Experimental Artifacts.
+\bibitem{Freire}J.Freire, P.Bonnet, and D.Shasha. “Computational reproducibility: State-of-the-art, challenges, and database research opportunities”. In Proceedings of the 2012 ACM SIGMOD International Conference on Management of Data, SIGMOD’12, pp.593-596, ACM, New York, 2012. 
+\bibitem{Simon} Simon Miles, Sylvia C Wong, Weijian Fang, Paul T Groth, Klaus-Peter Zauner, and Luc Moreau. Provenance-based validation of e-science experiments. J. Web Sem., 5:28–38, 2007.
+\bibitem{Davidson} S. Davidson and J. Freire. Provenance and scientiﬁc workﬂows: challenges and opportunities. In Procs. SIGMOD Conference, Tutorial, pages 1345–1350, 2008.
+\bibitem{Geetika} Geetika T Lakshmanan, Francisco Curbera, Juliana Freire, and Amit Sheth. Guest Editors’ Introduction: Provenance in Web Applications. IEEE Internet Computing, 15:17–21, 2011.
+\bibitem{Paul} Paul Groth, Simon Miles, Sanjay Modgil, Nir Oren, Michael Luck, and Yolanda Gil. Determining the Trustworthiness of New Electronic Contracts. In Proceedings of the Tenth Annual Workshop on Engineering Societies in the Agents’ World, (ESAW-09), Utrecht, The Netherlands, 2009.
+\bibitem{Hiden} H. Hiden, S. Woodman, P. Watson, and J. Cala, “Developing cloud applications using the e-Science Central platform.”, Philosophical trans- actions of the Royal Society, vol. 371, p. 20120085, 2013.
+\bibitem{Fernando} Fernando Chirigati, Dennis Shasha, Juliana Freire, “ReproZip: Using Provenance to Support Computational Reproducibility”, Proceedings of the 5th USENIX Workshop on the Theory and Practice of Provenance, 2013.
+\bibitem{Kim} J. Kim, E. Deelman, Y. Gil, G. Mehta, V. Ratnakar, “Provenance trails in the Wings/Pegasus workflow system.”, J. Comput. Concurr.: Pract. Experience, Special issue on the First Provenance Challenge, L. Moreau, B. Ludaescher (Eds), 2007.
+\bibitem{Stodden} V. Stodden, D. H. Bailey, J. Borwein, R. J. LeVeque, W. Rider, and W. Stein, “Setting the Default to Reproducible Reproducibility in Computational and Experimental Mathematics”, Institute for Computational and Experimental Research in Mathematics, Version of February 16, 2013.
+\bibitem{Duncan} Duncan Hull, Katy Wolstencroft, Robert Stevens, et al. “Taverna:  a tool for building and running workflows of services”. Nucleic Acids Research , 34(suppl 2):W729-W732, 1 July 2006. 
+\bibitem{Ludascher} B Ludascher, I Altintas, and C Berkley. “Scientific Workflow Management and the Kepler System. Concurrency and Computation”:  Practice and Experience , 18:1039-1065, 2005.
+\bibitem{Qasha} R. Qasha, J. Cała, P. Watson, “Towards automated workflow deployment in the cloud using TOSCA”, 8th IEEE International Conference on Cloud Computing, IEEE CLOUD, New York, USA, 2015.
+\bibitem{Kiran-Kumar} Kiran-Kumar Muniswamy-Reddy, Peter Macko, and Margo Seltzer, “Provenance for the Cloud”. In Proceedings of the 8th USENIX Conference on File and Storage Technologies, FAST’10, USENIX Association, Berkley, CA, 2010, pp. 15-14.
+\bibitem{David} David Koop, Emanuele Santos, Bela Bauer, Matthias Troyer, Juliana Freire, and Cl´audio T. Silva. “Bridging workflow and data provenance using strong links”. In SSDBM, pages 397–415, 2010. 
+\bibitem{Chirigati} F.Chirigati, and J.Freire. “Towards integrating workflow and database provenance”. In P.Groth and J.Frew, editors, Provenance and Annotation of Data and Processess, Lecture Nodes in Computer Science, pp.11-23. Springer, Berlin, Germany, 2012.
+\bibitem{Tomasz} Tomasz Miksa, Rudolf Mayer, and Andreas Rauber. “Ensuring sustain-ability of web services dependent processes”. International Journal of Computational Science and Engineering (IJCSE), 10(1/2):70–81, 2015.
+\bibitem{Timothy}Timothy Lebo, Satya Sahoo and Deborah McGuiness. (2013). PROV-O: The PROV Ontology. W3C Recommendation.. http://www.w3.org/TR/2013/RECprov-o-20130430/
+\bibitem{Tomasz} Tomasz Miksa, Stefan Pröll, Rudolf Mayer, Stephan Strodl, Ricardo Vieira, José Barateiro, and Andreas Rauber. “Framework for verification of preserved and redeployed processes”. In Proceedings of the 10th International Conference on Preservation of Digital Objects , Lisbon, Portugal, September 2–6 2013.
+\bibitem{Clifford} B. Clifford, I. Foster, M. Hategan, T. Stef-Praun, M. Wilde, and Y. Zhao. “Tracking provenance in a virtual data grid. Concurrency and Computation: Practice and Experience”, 20(5):565–575, 2008.
+\bibitem{Robert} Robert Ikeda, Hyunjung Park, and Jennifer Widom, “Provenance for Generalized Map and Reduce Workflows”5 th Biennial Conference on Innovative Data Systems Research (CIDR ’11) January 9-12, 2011, Asilomar, California, USA.
+\bibitem{Elena} Elena Vasilyeva, “Why-Query Support in Graph Databases” 32nd International Conference on Data Engineering Workshops, 2016.
+\bibitem{Chapman} A. Chapman and H. V. Jagadish. Why not? In International Conference on the Management of Data (SIGMOD) , pages 523–534, 2009.
+\bibitem{Bidoit} N. Bidoit, M. Herschel, and K. Tzompanaki, “Query-Based Why-Not Provenance with NedExplain,” inProc. EDBT , 2014, pp. 145–156.
+\bibitem{Cai} Cai, Diana, Youngjune Gwon, and Loren McGinnis. "Storing, Querying, and Compressing the Little-JIL Workflow Provenance."
+\bibitem{Timothy} Timothy McPhillips, et al, “YesWorkflow: A User-Oriented, Language-Independent Tool for Recovering Workflow Information from Scripts”, International Journal of Digital Curation,  Vol. 10, Iss. 1, 298–313, 2015.
+\bibitem{Murta} Murta, L., Braganholo, V., Chirigati, F., Koop, D. and  Freire, J. (2014). “noWorkflow: Capturing and analyzing provenance of scripts”. In B. Ludäscher and  B. Plale (Eds.), Lecture Notes in Computer Science: Vol. 8628. Provenance and Annotation of Data and Processes(pp. 71–83).
+\bibitem{Davison} Davison, A.P.: Automated capture of experiment context for easier reproducibility in computational research. Comput. Sci. Eng. 14(4), 48–56 (2012).
+\bibitem{Moreau} Moreau, L., Missier, P.: PROV-DM: The PROV data model. W3C Recommendation(2012). http://www.w3.org/TR/prov-dm/
+\bibitem{Wellington} Wellington Oliveira1,2 Daniel de Oliveira, Paolo Missier and Vanessa Braganholo, Kary Ocaña, “Analyzing Provenance Across Heterogeneous Provenance Graphs”, Springer International Publishing Switzerland, pp. 57–70, 2016. 
+\bibitem{Nwokedi} Nwokedi Idika, Mayank Varia, and Harry Phan “The Probabilistic Provenance Graph,IEEE Security and Privacy Workshops, 2013.
+\bibitem{Conradi} Conradi, R., Westfechtel, B.: Version models for software configuration management. ACM Comput. Surv. 30(2), 232–282 (1998).
+\bibitem{Joao} Joao Felipe Pimentel, Juliana Freire and Leonardo Murta, Vanessa Braganholo, “Tracking and Analyzing the Evolution of Provenance from Scripts” Springer International Publishing Switzerland, pp. 16–28, 2016.
+\end{thebibliography}
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
