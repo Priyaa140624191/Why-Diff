@@ -28,10 +28,6 @@ public class Prov2Neo2 {
 	}
 
 	public void createEntityNodes() {
-		// String fileName = "hdb-20171003-135417831.pl";
-		// String activityId;
-
-		// This will reference one line at a time
 		String line = null;
 
 		FileReader fileReader = null;
